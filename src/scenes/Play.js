@@ -4,35 +4,43 @@ class Play extends Phaser.Scene {
     }
     
     create() {
-        var board = []
-        var terrain = [];
-        var graphics = this.add.graphics();
-        graphics.fillStyle(0x71acf0, 1);
+        this.board = []
+        this.terrain = [];
+        this.graphics = this.add.graphics();
+        this.graphics.fillStyle(0x71acf0, 1);
 
         for (let i = 0; i < 11; i++) {
-            board[i] = [];
-            terrain[i] = [];
+            this.board[i] = [];
+            this.terrain[i] = [];
             for (let j = 0; j < 9; j++) {
-                board[i][j] = 0;
+                this.board[i][j] = 0;
                 if (([1, 2].includes(i) && [1, 2].includes(j))|| [8, 9].includes(i) && [6, 7].includes(j)){
-                    terrain[i][j] = 0
-                    graphics.fillStyle(0x40c72c, 1);
-                    graphics.fillRect(250 + 70*i, 30+70*j, 67,67);
-                    graphics.fillStyle(0x71acf0, 1);
+                    this.terrain[i][j] = 1
+                    this.board[i][j] = 2
+                    this.graphics.fillStyle(0x40c72c, 1);
+                    this.graphics.fillRect(310 + 60*i, 25+60*j, 57,57);
+                    this.graphics.fillStyle(0x71acf0, 1);
                 } else{
-                    terrain[i][j] = 0
-                    graphics.fillRect(250 + 70*i, 30+70*j, 67,67);
+                    this.terrain[i][j] = 0
+                    this.graphics.fillRect(310 + 60*i, 25+60*j, 57,57);
                 }
             }
         }
+        this.board[0][7] = 1
+        this.board[1][7] = 1
+        this.board[2][7] = 1
+        this.board[3][7] = 1 
+        this.board[4][7] = 1 
+        this.board[5][7] = 1 
+        this.board[6][7] = 1 
+
+        this.updateBoard()
+
+
 
         
 
-
-
-        
-
-        console.log(board)
+        console.log(this.board)
 
         // Draw a hand of card for each player, player 1 will begin so I will show their hand first
 
@@ -65,6 +73,21 @@ class Play extends Phaser.Scene {
 
         //Loop will continue until a player has no more units on the board
 
+
+    }
+
+    updateBoard(){
+        for (let i = 0; i < 11; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (this.board[i][j] % 2 == 1 ){
+                    this.graphics.fillStyle(0xffffff, 1);
+                    this.graphics.fillRect(310 + 60*i, 25+60*j, 57,26.5);
+                } else if (this.board[i][j] %2 == 0 && this.board[i][j] != 0){
+                    this.graphics.fillStyle(0x000000, 1);
+                    this.graphics.fillRect(310 + 60*i, 25+60*j+ 35, 57,21.5);
+                }
+            }
+        }
 
     }
 
