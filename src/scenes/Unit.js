@@ -6,8 +6,7 @@ class Unit extends Phaser.GameObjects.Sprite {
       this.defense = 0;
       this.range = 0;
       this.moveSpeed = 0;
-      this.row = 0;
-      this.column = 0;
+      this.position = 0;
       this.flankBonus = 0;
       this.supportBonus = 0;
       
@@ -24,6 +23,6 @@ class Unit extends Phaser.GameObjects.Sprite {
     ownedBy(){
       return this.player;
     }
-    
+
     
   }

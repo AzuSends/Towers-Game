@@ -4,7 +4,35 @@ class Play extends Phaser.Scene {
     }
     
     create() {
-        // Draw the board (board state will be stored in data and not using sprites)
+        var board = []
+        var terrain = [];
+        var graphics = this.add.graphics();
+        graphics.fillStyle(0x71acf0, 1);
+
+        for (let i = 0; i < 11; i++) {
+            board[i] = [];
+            terrain[i] = [];
+            for (let j = 0; j < 9; j++) {
+                board[i][j] = 0;
+                if (([1, 2].includes(i) && [1, 2].includes(j))|| [8, 9].includes(i) && [6, 7].includes(j)){
+                    terrain[i][j] = 0
+                    graphics.fillStyle(0x40c72c, 1);
+                    graphics.fillRect(250 + 70*i, 30+70*j, 67,67);
+                    graphics.fillStyle(0x71acf0, 1);
+                } else{
+                    terrain[i][j] = 0
+                    graphics.fillRect(250 + 70*i, 30+70*j, 67,67);
+                }
+            }
+        }
+
+        
+
+
+
+        
+
+        console.log(board)
 
         // Draw a hand of card for each player, player 1 will begin so I will show their hand first
 
