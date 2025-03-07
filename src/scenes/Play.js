@@ -56,6 +56,11 @@ class Play extends Phaser.Scene {
         this.board[5][4] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY + unitOffsetY + 60 * 4, "blackUnit", 0, 1, 5, 4, "calv3")
         this.board[6][4] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY + unitOffsetY + 60 * 4, "blackUnit", 0, 1, 6, 4, "calv4")
         this.board[2][2] = new Unit(this, boardOffestX + 60 * 2, boardOffsetY + unitOffsetY + 60 * 2, "blackUnit", 0, 1, 2, 2, "archer")
+        this.pieces.push(this.board[6][5]) //Secondary peice array allows for quickly iterating over all pieces without iterating over the whole board while
+        this.pieces.push(this.board[5][5]) //   the board array allows for simple adjacency checking without iterating over the entire peice array 
+        this.pieces.push(this.board[5][4]) //The peice array functions like an array of pointers which I really like too  
+        this.pieces.push(this.board[6][4])
+        this.pieces.push(this.board[2][2])
 
         this.determineBonuses();
 
@@ -103,21 +108,17 @@ class Play extends Phaser.Scene {
 
     }
 
-    resolveCombat() {
 
-    }
 
     determineBonuses() {
-        for (let i = 0; i < 11; i++) {
-            for (let j = 0; j < 9; j++) {
-                if (this.board[i][j] != 0) {
-                    this.support(i, j)
-                    this.flank(i, j)
-                    this.attack(i, j)
-                    this.checkHighGround(i, j)
-                }
-            }
+        console.log("________")
+        for (let i = 0; i < this.pieces.length; i++) {
+            this.support(this.pieces[i].boardX, this.pieces[i].boardY)
+            this.flank(this.pieces[i].boardX, this.pieces[i].boardY)
+            this.attack(this.pieces[i].boardX, this.pieces[i].boardY)
+            this.checkHighGround(this.pieces[i].boardX, this.pieces[i].boardY)
         }
+
     }
 
     support(i, j) {
