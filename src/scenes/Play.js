@@ -10,39 +10,61 @@ class Play extends Phaser.Scene {
         this.p1active = 0;
         this.p2active = 0;
         this.graphics = this.add.graphics();
-        this.graphics.fillStyle(0x71acf0, 1);
+        this.objectBoard = this.add.group();
+
+        this.graphics.fillStyle(0x40c72c, 1); //Color const
+        this.graphics.fillRect(0, 0, 57,57); //Needs cleanup, should be easy to determine where squares are so that mouse controls can be easily implemented
+        this.graphics.generateTexture("squareTextureGreen", 57,57)
+
+        this.graphics.fillStyle(0x71acf0, 1); //Color const
+        this.graphics.fillRect(0, 0, 57,57); //^
+        this.graphics.generateTexture("squareTexture", 57,57)
+
+        this.graphics.fillStyle(0x000000, 1); //Should be a const?
+        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
+        this.graphics.generateTexture("blackUnit", 57,26.5)
+
+        this.graphics.fillStyle(0xffffff, 1); //Should be a const?
+        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
+        this.graphics.generateTexture("whiteUnit", 57,26.5)
+
+        this.graphics.destroy();
+        
 
         for (let i = 0; i < 11; i++) {
             this.board[i] = [];
             this.terrain[i] = [];
+            this.objectBoard[i] = [];
             for (let j = 0; j < 9; j++) {
-                this.board[i][j] = "";
+                this.board[i][j] = 0;
                 if (([1, 2].includes(i) && [1, 2].includes(j))|| [8, 9].includes(i) && [6, 7].includes(j)){
                     this.terrain[i][j] = 1
-                    this.graphics.fillStyle(0x40c72c, 1); //Color const
-                    this.graphics.fillRect(310 + 60*i, 25+60*j, 57,57); //Needs cleanup, should be easy to determine where squares are so that mouse controls can be easily implemented
-                    this.graphics.fillStyle(0x71acf0, 1); //Color const
+                    
+                    var square = new BoardSquare(this, boardOffestX + 60*i, boardOffsetY + 60*j, "squareTextureGreen", 0)
+                    this.objectBoard[i].push(square)
                 } else{
                     this.terrain[i][j] = 0
-                    this.graphics.fillRect(310 + 60*i, 25+60*j, 57,57); //^
+                    
+                    var square = new BoardSquare(this, boardOffestX + 60*i, boardOffsetY + 60*j, "squareTexture", 0)
+                    this.objectBoard[i].push(square)
+
                 }
             }
         }
-        this.board[0][7] = 0
-        this.pieces[0] = ["calv", 2, 4, 2, 0, 7] //Should have an enum for index piece data array
-        this.p1active += 1; //Import state piece if I decide to try to network stuff
-        this.board[1][7] = 2
-        this.pieces[2] = ["calv", 2, 4, 2, 1, 7]
-        this.p1active += 1;
+        this.board[6][5] = new Unit(this, boardOffestX + 60*6, boardOffsetY - unitOffsetY + 60*5, "whiteUnit", 0, 0, 6, 5)
+        this.board[5][5] = new Unit(this, boardOffestX + 60*5, boardOffsetY - unitOffsetY + 60*5, "whiteUnit", 0, 0, 5, 5)
+        this.board[5][4] = new Unit(this, boardOffestX + 60*5, boardOffsetY + unitOffsetY + 60*4, "blackUnit", 0, 1, 5, 4)
+        this.board[6][4] = new Unit(this, boardOffestX + 60*6, boardOffsetY + unitOffsetY + 60*4, "blackUnit", 0, 1, 6, 4)
 
-        console.log(this.calv)
-        this.updateBoard()
+        this.determineBonuses();
+
+        
+
 
 
 
         
 
-        console.log(this.board)
 
         // Draw a hand of card for each player, player 1 will begin so I will show their hand first
 
@@ -80,15 +102,45 @@ class Play extends Phaser.Scene {
 
     }
 
-    updateBoard(){
+    resolveCombat(){
 
-        for (let i = 0; i < this.p1active; i++){
-            let x = this.pieces[i*2][4]
-            let y = this.pieces[i*2][5]
-            this.graphics.fillStyle(0xffffff, 1); //Should be a const?
-            this.graphics.fillRect(310 + 60*x, 25+60*y, 57,26.5);
-        } 
-        //Also needs loop for other player
+    }
+
+    determineBonuses(){
+        for (let i = 0; i < 11; i++){
+            for(let j = 0; j < 9; j++){
+                if (this.board[i][j] != 0){
+                    this.support(i,j)
+                }
+            }
+        }
+    }
+
+    support(i,j){
+        if (this.board[i-1][j] != 0 || this.board[i-1][j] != undefined){
+            if (this.board[i-1][j].player == this.board[i][j].player){
+                this.board[i][j].giveSupport(this.board[i-1][j])
+            }
+        }
+        if (this.board[i][j-1] != 0 || this.board[i][j-1] != undefined){
+            if (this.board[i][j-1].player == this.board[i][j].player){
+                this.board[i][j].giveSupport(this.board[i][j-1])
+            }
+        }
+        if (this.board[i+1][j] != 0 || this.board[i+1][j] != undefined){
+            if (this.board[i+1][j].player == this.board[i][j].player){
+                this.board[i][j].giveSupport(this.board[i+1][j])
+            }
+        }
+        if (this.board[i][j+1] != 0 || this.board[i][j+1] != undefined){
+            if (this.board[i][j+1].player == this.board[i][j].player){
+                this.board[i][j].giveSupport(this.board[i][j+1])
+            }
+        }
+    }
+
+    flank(){
+        
     }
 
     

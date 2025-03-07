@@ -11,5 +11,15 @@ let config = {
 }
 let game = new Phaser.Game(config)
 
+const boardOffestX = 339;
+const boardOffsetY = 54;
+const unitOffsetY = 15;
+const adjacencyDefault= [0,1,2,3,4,5,6,7,8];
+const adjacencyMinLeft = [0,3,6];
+const adjacencyMinRight = [2,5,8];
+const adjacencyMinTop = [0,1,2];
+const adjacencyMinBottom = [6,7,8];
+console.log(adjacencyDefault[99])
+
 
 

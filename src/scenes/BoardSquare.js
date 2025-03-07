@@ -1,13 +1,9 @@
-class Unit extends Phaser.GameObjects.Sprite {
-    constructor(scene, x, y, texture, frame, player, boardX, boardY) {
+class BoardSquare extends Phaser.GameObjects.Sprite {
+    constructor(scene, x, y, texture, frame) {
       super(scene, x, y, texture, frame)
-      this.player = player;
-      this.boardX = boardX;
-      this.boardY = boardY;
+      this.player = 0;
       this.attack = 0;
-      this.attackBonus = 0;
       this.defense = 0;
-      this.defenseBonus = 0;
       this.range = 0;
       this.moveSpeed = 0;
       this.position = 0;
@@ -28,8 +24,5 @@ class Unit extends Phaser.GameObjects.Sprite {
       return this.player;
     }
 
-    giveSupport(ally){
-      ally.attackBonus += this.supportBonus
-    }
     
   }
