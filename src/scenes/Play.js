@@ -6,14 +6,18 @@ class Play extends Phaser.Scene {
     create() {
         this.board = [];
         this.terrain = [];
-        this.pieces = [];
+        this.pieces = this.add.group();
         this.graphics = this.add.graphics();
         this.objectBoard = []
+        this.toBeCleaned = []
         this.clickedPiece = 0
+        this.turn = 0;
+        this.movesPerTurn = 3;
+        this.movesCurrentTurn = 0;
         this.p1Hand = this.add.group();
         this.p2Hand = this.add.group();
         this.possibleMoves = this.add.group();
-        this.currPlayer = 0;
+        this.currPlayer = 1;
         this.peiceClicked = false
         this.graphics.fillStyle(0x40c72c, 1); //Color const
         this.graphics.fillRect(0, 0, 57, 57);
@@ -75,45 +79,20 @@ class Play extends Phaser.Scene {
                 }
             }
         }
-        //this.board[6][7] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 6, 7, "calv0").setInteractive()
-        //this.board[5][7] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 5, 7, "calv1").setInteractive()
-        //this.board[4][7] = new Unit(this, boardOffestX + 60 * 4, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 4, 7, "calv3").setInteractive()
-
-        //this.board[6][1] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 6, 1, "calv2").setInteractive()
-        //this.board[5][1] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 5, 1, "calv2").setInteractive()
-        //this.board[4][1] = new Unit(this, boardOffestX + 60 * 4, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 4, 1, "calv6").setInteractive()
-
-        //this.pieces.push(this.board[6][7]) //Secondary peice array allows for quickly iterating over all pieces without iterating over the whole board while
-        //this.pieces.push(this.board[5][7]) //   the board array allows for simple adjacency checking without iterating over the entire peice array 
-        //this.pieces.push(this.board[4][7])
-
-        //this.pieces.push(this.board[6][1])
-        //this.pieces.push(this.board[5][1])
-        //this.pieces.push(this.board[4][1])
-
-
-        //console.log(this.pieces)
-
-        // this.determineBonuses();
 
         this.drawHandP1()
         this.drawHandP2()
 
 
-
-
-
-
-
-        // Draw a hand of card for each player, player 1 will begin so I will show their hand first
-
-        //Cards should be sprites as it will make it easy to instantiate them and move them around
-
-        //Players will make their "setup moves"
-
-        //Turn is passed back to player 1 
     }
     update() {
+
+        if (this.movesCurrentTurn == 0) {
+            this.currPlayer = !this.currPlayer
+            this.movesCurrentTurn = this.movesPerTurn
+            this.determineBonuses()
+            this.doCleanup();
+        }
 
         //On click draw the possible moves and 
 
@@ -148,12 +127,11 @@ class Play extends Phaser.Scene {
 
 
     determineBonuses() {
-        console.log("________")
-        for (let i = 0; i < this.pieces.length; i++) {
-            this.support(this.pieces[i].boardX, this.pieces[i].boardY)
-            this.flank(this.pieces[i].boardX, this.pieces[i].boardY)
-            this.attack(this.pieces[i].boardX, this.pieces[i].boardY)
-            this.checkHighGround(this.pieces[i].boardX, this.pieces[i].boardY)
+        for (const child of this.pieces.getChildren()) {
+            this.support(child.boardX, child.boardY)
+            this.flank(child.boardX, child.boardY)
+            this.checkHighGround(child.boardX, child.boardY)
+            this.attack(child.boardX, child.boardY)
         }
 
     }
@@ -208,22 +186,32 @@ class Play extends Phaser.Scene {
     attack(i, j) {
         if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
             if (this.board[i - 1][j].player != this.board[i][j].player) {
-                this.board[i][j].fight(this.board[i - 1][j])
+                if (this.board[i][j].fight(this.board[i - 1][j])) {
+                    this.toBeCleaned.push(this.board[i - 1][j])
+                }
             }
         }
         if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
             if (this.board[i][j - 1].player != this.board[i][j].player) {
-                this.board[i][j].fight(this.board[i][j - 1])
+                if (this.board[i][j].fight(this.board[i][j - 1])) {
+                    this.toBeCleaned.push(this.board[i][j - 1])
+                }
             }
         }
         if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
             if (this.board[i + 1][j].player != this.board[i][j].player) {
-                this.board[i][j].fight(this.board[i + 1][j])
+
+                if (this.board[i][j].fight(this.board[i + 1][j])) {
+                    this.toBeCleaned.push(this.board[i + 1][j])
+                }
             }
         }
         if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
             if (this.board[i][j + 1].player != this.board[i][j].player) {
-                this.board[i][j].fight(this.board[i][j + 1])
+
+                if (this.board[i][j].fight(this.board[i][j + 1])) {
+                    this.toBeCleaned.push(this.board[i][j + 1])
+                }
             }
         }
     }
@@ -241,7 +229,7 @@ class Play extends Phaser.Scene {
         console.log("click on " + x + " " + y)
         var peice = this.board[x][y]
         if (peice != 0 && peice != undefined) {
-            if (peice.player == this.currPlayer || true) {
+            if (peice.player == this.currPlayer) {
                 this.peiceClicked = true
                 this.clickedPiece = this.board[x][y]
                 this.genMoves(x, y, peice.moveSpeed)
@@ -285,40 +273,41 @@ class Play extends Phaser.Scene {
         } else {
             this.clickedPiece.y = boardOffsetY + unitOffsetY + 60 * y
         }
+        this.movesCurrentTurn -= 1
     }
 
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calv").setInteractive();
+        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calv", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)
-        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "inf").setInteractive();
+        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "inf", 0).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p1Hand.add(infCard)
-        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "infHeavy").setInteractive();
+        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "infHeavy", 0).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p1Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "pike").setInteractive();
+        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "pike", 0).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p1Hand.add(pikeCard)
     }
     drawHandP2() {
-        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calv").setInteractive();
+        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calv", 1).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p2Hand.add(calvCard)
-        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "inf").setInteractive();
+        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "inf", 1).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p2Hand.add(infCard)
-        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "infHeavy").setInteractive();
+        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "infHeavy", 1).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p2Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "pike").setInteractive();
+        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "pike", 1).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p2Hand.add(pikeCard)
@@ -347,14 +336,21 @@ class Play extends Phaser.Scene {
         });
     }
     playCard(card) {
-        if (this.peiceClicked == true) {
+        if (this.peiceClicked == true || this.currPlayer != card.player) {
             return;
         }
         this.peiceClicked = true
         for (let i = 0; i < 11; i++) {
-            if (this.board[i][8] == 0) {
-                var possible = new BoardHighlight(this, boardOffestX + 60 * i, boardOffsetY - unitOffsetY + 60 * 8, "whiteUnitTemp", 0, i, 8, false, card.name).setInteractive();
-                this.possibleMoves.add(possible)
+            if (this.currPlayer == 0) {
+                if (this.board[i][8] == 0) {
+                    var possible = new BoardHighlight(this, boardOffestX + 60 * i, boardOffsetY - unitOffsetY + 60 * 8, "whiteUnitTemp", 0, i, 8, false, card.name).setInteractive();
+                    this.possibleMoves.add(possible)
+                }
+            } else {
+                if (this.board[i][0] == 0) {
+                    var possible = new BoardHighlight(this, boardOffestX + 60 * i, boardOffsetY + unitOffsetY + 60 * 0, "blackUnitTemp", 0, i, 0, false, card.name).setInteractive();
+                    this.possibleMoves.add(possible)
+                }
             }
         }
         card.setActive(false).setVisible(false)
@@ -362,11 +358,25 @@ class Play extends Phaser.Scene {
     }
 
     genPiece(x, y, name) {
-        this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnit", 0, 0, x, y, name).setInteractive()
-        this.pieces.push(this.board[x][y])
+        if (this.currPlayer == 0) {
+            this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnit", 0, 0, x, y, name).setInteractive()
+        } else {
+            this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY + unitOffsetY + 60 * y, "blackUnit", 0, 1, x, y, name).setInteractive()
+        }
+        this.pieces.add(this.board[x][y])
         this.possibleMoves.clear(true, true);
         this.peiceClicked = false;
+        this.movesCurrentTurn -= 1;
 
+    }
+    doCleanup() {
+        for (let i = 0; i < this.toBeCleaned.length; i++) {
+            let x = this.toBeCleaned[i].boardX
+            let y = this.toBeCleaned[i].boardY
+            this.board[x][y] = 0
+            this.pieces.remove(this.toBeCleaned[i], true, true);
+        }
+        this.toBeCleaned = []
     }
 
 

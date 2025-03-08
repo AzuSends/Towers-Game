@@ -4,7 +4,7 @@ class BoardHighlight extends Phaser.GameObjects.Sprite {
     this.boardX = boardX
     this.boardY = boardY
     this.hasParent = hasParent
-    this.name = ""
+    this.name = name
 
 
 
