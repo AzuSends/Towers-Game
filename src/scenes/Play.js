@@ -92,6 +92,7 @@ class Play extends Phaser.Scene {
             this.movesCurrentTurn = this.movesPerTurn
             this.determineBonuses()
             this.doCleanup();
+            console.log("Turn Passed to Opponent")
         }
 
         //On click draw the possible moves and 
@@ -137,24 +138,32 @@ class Play extends Phaser.Scene {
     }
 
     support(i, j) {
-        if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
-            if (this.board[i - 1][j].player == this.board[i][j].player) {
-                this.board[i][j].giveSupport(this.board[i - 1][j])
+        if (i - 1 >= 0) {
+            if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
+                if (this.board[i - 1][j].player == this.board[i][j].player) {
+                    this.board[i][j].giveSupport(this.board[i - 1][j])
+                }
             }
         }
-        if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
-            if (this.board[i][j - 1].player == this.board[i][j].player) {
-                this.board[i][j].giveSupport(this.board[i][j - 1])
+        if (j - 1 >= 0) {
+            if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
+                if (this.board[i][j - 1].player == this.board[i][j].player) {
+                    this.board[i][j].giveSupport(this.board[i][j - 1])
+                }
             }
         }
-        if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
-            if (this.board[i + 1][j].player == this.board[i][j].player) {
-                this.board[i][j].giveSupport(this.board[i + 1][j])
+        if (i + 1 < 11) {
+            if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
+                if (this.board[i + 1][j].player == this.board[i][j].player) {
+                    this.board[i][j].giveSupport(this.board[i + 1][j])
+                }
             }
         }
-        if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
-            if (this.board[i][j + 1].player == this.board[i][j].player) {
-                this.board[i][j].giveSupport(this.board[i][j + 1])
+        if (j + 1 < 9) {
+            if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
+                if (this.board[i][j + 1].player == this.board[i][j].player) {
+                    this.board[i][j].giveSupport(this.board[i][j + 1])
+                }
             }
         }
     }
@@ -226,12 +235,12 @@ class Play extends Phaser.Scene {
         if (this.peiceClicked == true) {
             return;
         }
-        console.log("click on " + x + " " + y)
         var peice = this.board[x][y]
         if (peice != 0 && peice != undefined) {
             if (peice.player == this.currPlayer) {
                 this.peiceClicked = true
                 this.clickedPiece = this.board[x][y]
+                this.displayStats(this.clickedPiece)
                 this.genMoves(x, y, peice.moveSpeed)
 
             }
@@ -277,37 +286,37 @@ class Play extends Phaser.Scene {
     }
 
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calv", 0).setInteractive();
+        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "Cavilry", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)
-        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "inf", 0).setInteractive();
+        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "Infantry", 0).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p1Hand.add(infCard)
-        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "infHeavy", 0).setInteractive();
+        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "Heavy Infantry", 0).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p1Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "pike", 0).setInteractive();
+        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "Pike Block", 0).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p1Hand.add(pikeCard)
     }
     drawHandP2() {
-        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calv", 1).setInteractive();
+        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "Cavilry", 1).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p2Hand.add(calvCard)
-        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "inf", 1).setInteractive();
+        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "Infantry", 1).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p2Hand.add(infCard)
-        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "infHeavy", 1).setInteractive();
+        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "Heavy Infantry", 1).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p2Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "pike", 1).setInteractive();
+        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "Pike Block", 1).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p2Hand.add(pikeCard)
@@ -315,6 +324,7 @@ class Play extends Phaser.Scene {
 
     applySlideTweenUp(card) {
         card.on('pointerover', () => {
+            this.displayStats(card)
             this.tweens.add({
                 targets: card,
                 y: 620,
@@ -377,6 +387,36 @@ class Play extends Phaser.Scene {
             this.pieces.remove(this.toBeCleaned[i], true, true);
         }
         this.toBeCleaned = []
+    }
+
+    displayStats(unit) {
+        if (unit.unitName == undefined) {
+            var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name)
+            console.log("         ");
+            console.log("         ");
+            console.log("Piece Stats:")
+            console.log("Name: " + temp.unitName)
+            console.log("Attack: " + temp.attack)
+            console.log("Defense: " + temp.defense)
+            console.log("Range: " + temp.range)
+            console.log("Move Speed: " + temp.moveSpeed)
+            console.log("Flank Bonus: " + temp.flankBonus)
+            console.log("Support Bonus: " + temp.supportBonus)
+            temp.destroy()
+
+            return;
+        }
+        console.log("         ");
+        console.log("         ");
+        console.log("Piece Stats:")
+        console.log("Name: " + unit.unitName)
+        console.log("Attack: " + unit.attack)
+        console.log("Defense: " + unit.defense)
+        console.log("Range: " + unit.range)
+        console.log("Move Speed: " + unit.moveSpeed)
+        console.log("Flank Bonus: " + unit.flankBonus)
+        console.log("Support Bonus: " + unit.supportBonus)
+
     }
 
 

@@ -7,7 +7,7 @@ class Unit extends Phaser.GameObjects.Sprite {
     scene.add.existing(this)
 
     this.on('pointerup', this.handleClick, this);
-
+    this.unitName = unitName
 
     switch (this.unitName) {
       case "Cavilry":
@@ -35,7 +35,6 @@ class Unit extends Phaser.GameObjects.Sprite {
     this.flankBonus = this.stats[6];
     this.supportBonus = this.stats[7];
     this.highGroundBonus = this.stats[8];
-    this.unitName = unitName
   }
 
 

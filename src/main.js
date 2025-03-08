@@ -7,7 +7,7 @@ let config = {
     width: 1280,
     height: 720,
     backgroundColor: "rgb(240,181,113)",
-    scene: [Play]
+    scene: [Menu, Play]
 }
 let game = new Phaser.Game(config)
 
