@@ -9,18 +9,15 @@ class Unit extends Phaser.GameObjects.Sprite {
     this.defense = 0;
     this.defensePenalty = 0;
     this.range = 0;
-    this.moveSpeed = 0;
+    this.moveSpeed = 2;
     this.position = 0;
     this.flankBonus = 0;
     this.supportBonus = 0;
     this.highGroundBonus = 0;
     this.unitName = unitName
-
-
-
-
-    // add object to existing scene
     scene.add.existing(this)
+
+    this.on('pointerup', this.handleClick, this);
   }
 
   update() {
@@ -48,6 +45,10 @@ class Unit extends Phaser.GameObjects.Sprite {
 
   highGround() {
     console.log(this.unitName + " has the high ground ")
+  }
+
+  handleClick() {
+    this.scene.boardClick(this.boardX, this.boardY);
   }
 
 }

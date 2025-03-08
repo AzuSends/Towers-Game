@@ -1,8 +1,10 @@
-class BoardSquare extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y, texture, frame, boardX, boardY) {
+class BoardHighlight extends Phaser.GameObjects.Sprite {
+  constructor(scene, x, y, texture, frame, boardX, boardY, hasParent, name) {
     super(scene, x, y, texture, frame)
     this.boardX = boardX
     this.boardY = boardY
+    this.hasParent = hasParent
+    this.name = ""
 
 
 
@@ -20,7 +22,12 @@ class BoardSquare extends Phaser.GameObjects.Sprite {
   }
 
   handleClick() {
-    this.scene.boardClick(this.boardX, this.boardY);
+    if (this.hasParent == true) {
+      this.scene.finalizePlacement(this.boardX, this.boardY);
+    }
+    else {
+      this.scene.genPiece(this.boardX, this.boardY, this.name)
+    }
   }
 
 

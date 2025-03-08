@@ -1,8 +1,8 @@
-class BoardSquare extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y, texture, frame, boardX, boardY) {
+class Card extends Phaser.GameObjects.Sprite {
+  constructor(scene, x, y, texture, frame, name) {
     super(scene, x, y, texture, frame)
-    this.boardX = boardX
-    this.boardY = boardY
+
+    this.name = name
 
 
 
@@ -15,12 +15,9 @@ class BoardSquare extends Phaser.GameObjects.Sprite {
   update() {
     //Nothing needed here as this will mostly be used as a class to manage combat and troop position
   }
-  ownedBy() {
-    return this.player;
-  }
 
   handleClick() {
-    this.scene.boardClick(this.boardX, this.boardY);
+    this.scene.playCard(this);
   }
 
 

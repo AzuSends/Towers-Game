@@ -7,13 +7,16 @@ class Play extends Phaser.Scene {
         this.board = [];
         this.terrain = [];
         this.pieces = [];
-        this.p1active = 0;
-        this.p2active = 0;
         this.graphics = this.add.graphics();
-        this.objectBoard = this.add.group();
-
+        this.objectBoard = []
+        this.clickedPiece = 0
+        this.p1Hand = this.add.group();
+        this.p2Hand = this.add.group();
+        this.possibleMoves = this.add.group();
+        this.currPlayer = 0;
+        this.peiceClicked = false
         this.graphics.fillStyle(0x40c72c, 1); //Color const
-        this.graphics.fillRect(0, 0, 57, 57); //Needs cleanup, should be easy to determine where squares are so that mouse controls can be easily implemented
+        this.graphics.fillRect(0, 0, 57, 57);
         this.graphics.generateTexture("squareTextureGreen", 57, 57)
 
         this.graphics.fillStyle(0x71acf0, 1); //Color const
@@ -23,12 +26,33 @@ class Play extends Phaser.Scene {
         this.graphics.fillStyle(0x000000, 1); //Should be a const?
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
         this.graphics.generateTexture("blackUnit", 57, 26.5)
+        this.graphics.clear();
+
+        this.graphics.fillStyle(0x000000, 0.3); //Should be a const?
+        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
+        this.graphics.generateTexture("blackUnitTemp", 57, 26.5)
 
         this.graphics.fillStyle(0xffffff, 1); //Should be a const?
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
         this.graphics.generateTexture("whiteUnit", 57, 26.5)
+        this.graphics.clear();
 
+        this.graphics.fillStyle(0xffffff, 0.3); //Should be a const?
+        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
+        this.graphics.generateTexture("whiteUnitTemp", 57, 26.5)
+        this.graphics.clear();
+
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(0, 0, 135, 189);
+        this.graphics.generateTexture("cardTempWhite", 135, 189)
+        this.graphics.clear();
+
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(0, 0, 135, 189);
+        this.graphics.generateTexture("cardTempBlack", 135, 189)
         this.graphics.destroy();
+
+
 
 
         for (let i = 0; i < 11; i++) {
@@ -40,31 +64,40 @@ class Play extends Phaser.Scene {
                 if (([1, 2].includes(i) && [1, 2].includes(j)) || [8, 9].includes(i) && [6, 7].includes(j)) {
                     this.terrain[i][j] = 1
 
-                    var square = new BoardSquare(this, boardOffestX + 60 * i, boardOffsetY + 60 * j, "squareTextureGreen", 0)
+                    var square = new BoardSquare(this, boardOffestX + 60 * i, boardOffsetY + 60 * j, "squareTextureGreen", 0, i, j).setInteractive();
                     this.objectBoard[i].push(square)
                 } else {
                     this.terrain[i][j] = 0
 
-                    var square = new BoardSquare(this, boardOffestX + 60 * i, boardOffsetY + 60 * j, "squareTexture", 0)
+                    var square = new BoardSquare(this, boardOffestX + 60 * i, boardOffsetY + 60 * j, "squareTexture", 0, i, j).setInteractive();
                     this.objectBoard[i].push(square)
 
                 }
             }
         }
-        this.board[6][5] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY - unitOffsetY + 60 * 5, "whiteUnit", 0, 0, 6, 5, "calv1")
-        this.board[5][5] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY - unitOffsetY + 60 * 5, "whiteUnit", 0, 0, 5, 5, "calv2")
-        this.board[5][4] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY + unitOffsetY + 60 * 4, "blackUnit", 0, 1, 5, 4, "calv3")
-        this.board[6][4] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY + unitOffsetY + 60 * 4, "blackUnit", 0, 1, 6, 4, "calv4")
-        this.board[2][2] = new Unit(this, boardOffestX + 60 * 2, boardOffsetY + unitOffsetY + 60 * 2, "blackUnit", 0, 1, 2, 2, "archer")
-        this.pieces.push(this.board[6][5]) //Secondary peice array allows for quickly iterating over all pieces without iterating over the whole board while
-        this.pieces.push(this.board[5][5]) //   the board array allows for simple adjacency checking without iterating over the entire peice array 
-        this.pieces.push(this.board[5][4]) //The peice array functions like an array of pointers which I really like too  
-        this.pieces.push(this.board[6][4])
-        this.pieces.push(this.board[2][2])
+        //this.board[6][7] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 6, 7, "calv0").setInteractive()
+        //this.board[5][7] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 5, 7, "calv1").setInteractive()
+        //this.board[4][7] = new Unit(this, boardOffestX + 60 * 4, boardOffsetY - unitOffsetY + 60 * 7, "whiteUnit", 0, 0, 4, 7, "calv3").setInteractive()
 
-        this.determineBonuses();
+        //this.board[6][1] = new Unit(this, boardOffestX + 60 * 6, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 6, 1, "calv2").setInteractive()
+        //this.board[5][1] = new Unit(this, boardOffestX + 60 * 5, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 5, 1, "calv2").setInteractive()
+        //this.board[4][1] = new Unit(this, boardOffestX + 60 * 4, boardOffsetY + unitOffsetY + 60 * 1, "blackUnit", 0, 1, 4, 1, "calv6").setInteractive()
+
+        //this.pieces.push(this.board[6][7]) //Secondary peice array allows for quickly iterating over all pieces without iterating over the whole board while
+        //this.pieces.push(this.board[5][7]) //   the board array allows for simple adjacency checking without iterating over the entire peice array 
+        //this.pieces.push(this.board[4][7])
+
+        //this.pieces.push(this.board[6][1])
+        //this.pieces.push(this.board[5][1])
+        //this.pieces.push(this.board[4][1])
 
 
+        //console.log(this.pieces)
+
+        // this.determineBonuses();
+
+        this.drawHandP1()
+        this.drawHandP2()
 
 
 
@@ -81,6 +114,10 @@ class Play extends Phaser.Scene {
         //Turn is passed back to player 1 
     }
     update() {
+
+        //On click draw the possible moves and 
+
+
         //Current player will be set and used as a variable to avoid nesting conditionals
 
         //Game will wait for mouse actions
@@ -197,6 +234,142 @@ class Play extends Phaser.Scene {
         }
     }
 
+    boardClick(x, y) {
+        if (this.peiceClicked == true) {
+            return;
+        }
+        console.log("click on " + x + " " + y)
+        var peice = this.board[x][y]
+        if (peice != 0 && peice != undefined) {
+            if (peice.player == this.currPlayer || true) {
+                this.peiceClicked = true
+                this.clickedPiece = this.board[x][y]
+                this.genMoves(x, y, peice.moveSpeed)
+
+            }
+        }
+    }
+
+    genMoves(x, y, speed) {
+        if (speed == -1) {
+            return;
+        }
+        if (x >= 0 && x <= 10) {
+            if (this.board[x][y] == 0) {
+                if (this.clickedPiece.player == 0) {
+                    var possible = new BoardHighlight(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnitTemp", 0, x, y, true).setInteractive();
+                    this.possibleMoves.add(possible)
+                } else {
+                    var possible = new BoardHighlight(this, boardOffestX + 60 * x, boardOffsetY + unitOffsetY + 60 * y, "blackUnitTemp", 0, x, y, true).setInteractive();
+                    this.possibleMoves.add(possible)
+                }
+            }
+        }
+        this.genMoves(x + 1, y, speed - 1)
+        this.genMoves(x - 1, y, speed - 1)
+        this.genMoves(x, y + 1, speed - 1)
+        this.genMoves(x, y - 1, speed - 1)
+
+    }
+
+    finalizePlacement(x, y) {
+        this.possibleMoves.clear(true, true);
+        this.peiceClicked = false
+        this.board[x][y] = this.clickedPiece
+        this.board[this.clickedPiece.boardX][this.clickedPiece.boardY] = 0
+        this.clickedPiece.boardX = x
+        this.clickedPiece.boardY = y
+        this.clickedPiece.x = boardOffestX + 60 * x
+        if (this.clickedPiece.player == 0) {
+            this.clickedPiece.y = boardOffsetY - unitOffsetY + 60 * y
+        } else {
+            this.clickedPiece.y = boardOffsetY + unitOffsetY + 60 * y
+        }
+    }
+
+    drawHandP1() {
+        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calv").setInteractive();
+        this.applySlideTweenUp(calvCard)
+        this.applySlideTweenDown(calvCard)
+        this.p1Hand.add(calvCard)
+        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "inf").setInteractive();
+        this.applySlideTweenUp(infCard)
+        this.applySlideTweenDown(infCard)
+        this.p1Hand.add(infCard)
+        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "infHeavy").setInteractive();
+        this.applySlideTweenUp(infHeavyCard)
+        this.applySlideTweenDown(infHeavyCard)
+        this.p1Hand.add(infHeavyCard)
+        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "pike").setInteractive();
+        this.applySlideTweenUp(pikeCard)
+        this.applySlideTweenDown(pikeCard)
+        this.p1Hand.add(pikeCard)
+    }
+    drawHandP2() {
+        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calv").setInteractive();
+        this.applySlideTweenUp(calvCard)
+        this.applySlideTweenDown(calvCard)
+        this.p2Hand.add(calvCard)
+        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "inf").setInteractive();
+        this.applySlideTweenUp(infCard)
+        this.applySlideTweenDown(infCard)
+        this.p2Hand.add(infCard)
+        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "infHeavy").setInteractive();
+        this.applySlideTweenUp(infHeavyCard)
+        this.applySlideTweenDown(infHeavyCard)
+        this.p2Hand.add(infHeavyCard)
+        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "pike").setInteractive();
+        this.applySlideTweenUp(pikeCard)
+        this.applySlideTweenDown(pikeCard)
+        this.p2Hand.add(pikeCard)
+    }
+
+    applySlideTweenUp(card) {
+        card.on('pointerover', () => {
+            this.tweens.add({
+                targets: card,
+                y: 620,
+                ease: "power2",
+                duration: 300
+
+            });
+        });
+    }
+    applySlideTweenDown(card) {
+        card.on('pointerout', () => {
+            this.tweens.add({
+                targets: card,
+                y: 700,
+                ease: "power2",
+                duration: 300
+
+            });
+        });
+    }
+    playCard(card) {
+        if (this.peiceClicked == true) {
+            return;
+        }
+        this.peiceClicked = true
+        for (let i = 0; i < 11; i++) {
+            if (this.board[i][8] == 0) {
+                var possible = new BoardHighlight(this, boardOffestX + 60 * i, boardOffsetY - unitOffsetY + 60 * 8, "whiteUnitTemp", 0, i, 8, false, card.name).setInteractive();
+                this.possibleMoves.add(possible)
+            }
+        }
+        card.setActive(false).setVisible(false)
+
+    }
+
+    genPiece(x, y, name) {
+        this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnit", 0, 0, x, y, name).setInteractive()
+        this.pieces.push(this.board[x][y])
+        this.possibleMoves.clear(true, true);
+        this.peiceClicked = false;
+
+    }
+
 
 
 }
+
