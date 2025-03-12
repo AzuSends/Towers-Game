@@ -4,44 +4,52 @@ class Play extends Phaser.Scene {
     }
 
     create() {
+        //Setup state managment variables
         this.board = [];
         this.terrain = [];
-        this.pieces = this.add.group();
-        this.graphics = this.add.graphics();
         this.objectBoard = []
         this.toBeCleaned = []
         this.clickedPiece = 0
         this.turn = 0;
         this.movesPerTurn = 3;
         this.movesCurrentTurn = 0;
+        this.currPlayer = 1;
+        this.peiceClicked = false
+
+        //Graphics Controller
+        this.graphics = this.add.graphics();
+        
+        //Groups for managing class instances
+        this.pieces = this.add.group();
         this.p1Hand = this.add.group();
         this.p2Hand = this.add.group();
         this.possibleMoves = this.add.group();
-        this.currPlayer = 1;
-        this.peiceClicked = false
-        this.graphics.fillStyle(0x40c72c, 1); //Color const
+
+
+        //Generating generic textures for pieces and cards (Ideally card will get art but units will likely remain simple) 
+        this.graphics.fillStyle(0x40c72c, 1);
         this.graphics.fillRect(0, 0, 57, 57);
         this.graphics.generateTexture("squareTextureGreen", 57, 57)
 
-        this.graphics.fillStyle(0x71acf0, 1); //Color const
-        this.graphics.fillRect(0, 0, 57, 57); //^
+        this.graphics.fillStyle(0x71acf0, 1);
+        this.graphics.fillRect(0, 0, 57, 57); 
         this.graphics.generateTexture("squareTexture", 57, 57)
 
-        this.graphics.fillStyle(0x000000, 1); //Should be a const?
-        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
+        this.graphics.fillStyle(0x000000, 1); 
+        this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j (reference)
         this.graphics.generateTexture("blackUnit", 57, 26.5)
         this.graphics.clear();
 
-        this.graphics.fillStyle(0x000000, 0.3); //Should be a const?
+        this.graphics.fillStyle(0x000000, 0.3); 
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
         this.graphics.generateTexture("blackUnitTemp", 57, 26.5)
 
-        this.graphics.fillStyle(0xffffff, 1); //Should be a const?
+        this.graphics.fillStyle(0xffffff, 1); 
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
         this.graphics.generateTexture("whiteUnit", 57, 26.5)
         this.graphics.clear();
 
-        this.graphics.fillStyle(0xffffff, 0.3); //Should be a const?
+        this.graphics.fillStyle(0xffffff, 0.3); 
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
         this.graphics.generateTexture("whiteUnitTemp", 57, 26.5)
         this.graphics.clear();
@@ -58,7 +66,40 @@ class Play extends Phaser.Scene {
 
 
 
+        //Simple setup for piece stat display
+        let statDisplayConfig = {
+            fontFamily: 'Times New Roman',
+            fontSize: '28px',
+            backgroundColor: 'rgb(240,181,113)',
+            color: '#843605',
+            align: 'right',
+            padding: {
+              top: 5,
+              bottom: 5,
+            },
+            fixedWidth: 0
+        }
 
+        //Definitions so that text can be easily updted
+        let textOffset = 35
+        this.statsText = this.add.text(3, 0, "Piece Stats:", statDisplayConfig)
+        this.nameText = this.add.text(3, textOffset, "Name: ", statDisplayConfig)
+        this.attackText = this.add.text(3, textOffset*2, "Attack: ", statDisplayConfig)
+        this.defenseText = this.add.text(3, textOffset*3, "Defense: ", statDisplayConfig)
+        this.rangeText = this.add.text(3, textOffset*4, "Range: ", statDisplayConfig)
+        this.speedText = this.add.text(3, textOffset*5, "Move Speed: ", statDisplayConfig)
+        this.flankText = this.add.text(3, textOffset*6, "Flank Bonus: ", statDisplayConfig)
+        this.supportText = this.add.text(3, textOffset*7, "Support Bonus: ", statDisplayConfig)
+
+
+
+
+        //There are three pieces here
+        //The objectBoard is a set of objects that create the visual representation, this allows clicks to be registered onto board squares easily but is not currently used
+        //Board is initiallized to 0's and will store the piece instances in it, this allows for quickly determining adjacency to other pieces without having to iterate over all of them.
+        //  We can instead just check the respective board space for an object
+        //Finally is terrain, we just set 2 2x2 squares as high group by coloring the squares green and setting that part of the high groud matrix to 1 for quick checking.
+        //  Eventually high group will give bounus stats to units and extra range to ranged units   
         for (let i = 0; i < 11; i++) {
             this.board[i] = [];
             this.terrain[i] = [];
@@ -79,7 +120,7 @@ class Play extends Phaser.Scene {
                 }
             }
         }
-
+        //Draws card into each players hand, check function for more info. 
         this.drawHandP1()
         this.drawHandP2()
 
@@ -87,12 +128,16 @@ class Play extends Phaser.Scene {
     }
     update() {
 
+        //Primary game loop. This is very simple since most of the state is managed by the individual pieces. doCombat and the other funtions it calls are rather wordy but that is 
+        //  mostly control flow and checking adjacency etc.  
+        //Each player gets 3 moves per turn and the turn is complete when they have made their three moves.
         if (this.movesCurrentTurn == 0) {
             this.currPlayer = !this.currPlayer
             this.movesCurrentTurn = this.movesPerTurn
-            this.determineBonuses()
+            this.doCombat()
             this.doCleanup();
             console.log("Turn Passed to Opponent")
+            this.turn += 1;
         }
 
 
@@ -101,11 +146,22 @@ class Play extends Phaser.Scene {
 
 
 
-    determineBonuses() {
+    doCombat() { //Check respective function to see implementation
+
+        for (const child of this.pieces.getChildren()) { //Seperate loop to clear all stat changes from previous combat
+            child.resetBonuses();
+        }
         for (const child of this.pieces.getChildren()) {
+            //Apply support bonus to orthogonally adjacent allies
             this.support(child.boardX, child.boardY)
+            //Apply flanking penalty to diagonally adjacent enemies
             this.flank(child.boardX, child.boardY)
+            //Each piece checks if it is on high group and applies the respective bonuses
             this.checkHighGround(child.boardX, child.boardY)
+            
+        }
+        for (const child of this.pieces.getChildren()) { //Seperate loop to allow all stat changes to be preformed first
+            //Compares combat stats of orthogonally adjacent enemies after bonuses and penalties, units are destroyed if the attacking unit's attack is greater than their defense
             this.attack(child.boardX, child.boardY)
         }
 
@@ -205,6 +261,7 @@ class Play extends Phaser.Scene {
         }
     }
 
+    //First checked if a piece is already clicked, if not we set the piece as the clicked peice and show the current player their possible moves 
     boardClick(x, y) {
         if (this.peiceClicked == true) {
             return;
@@ -221,6 +278,8 @@ class Play extends Phaser.Scene {
         }
     }
 
+    //I always love when I can find a cool recursive solution to a problem, this function recursivly checks all orthogonally adjacent moves from some square and generates a temporary piece object
+    //  which, when clicked, deletes all the temps and moves the origional piece 
     genMoves(x, y, speed) {
         if (speed == -1) {
             return;
@@ -243,6 +302,7 @@ class Play extends Phaser.Scene {
 
     }
 
+    //Cleanup for temp pieces 
     finalizePlacement(x, y) {
         this.possibleMoves.clear(true, true);
         this.peiceClicked = false
@@ -259,6 +319,8 @@ class Play extends Phaser.Scene {
         this.movesCurrentTurn -= 1
     }
 
+    //Creates all the cards, only the piece name is required since stats are all managed in the unit class when the card becomes a unit and only depends on the piece name.
+    //  A tween is given to each card causing them to slide up and down on mouse over.  
     drawHandP1() {
         var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "Cavilry", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
@@ -296,6 +358,7 @@ class Play extends Phaser.Scene {
         this.p2Hand.add(pikeCard)
     }
 
+    //Card tween logic, also caused the stat display since both or caused by mouse over
     applySlideTweenUp(card) {
         card.on('pointerover', () => {
             this.displayStats(card)
@@ -308,6 +371,7 @@ class Play extends Phaser.Scene {
             });
         });
     }
+
     applySlideTweenDown(card) {
         card.on('pointerout', () => {
             this.tweens.add({
@@ -319,6 +383,17 @@ class Play extends Phaser.Scene {
             });
         });
     }
+    //Applies a mouse over to indivudial units allowing for stat display on hover
+    applyTextUpdate(unit) {
+        unit.on('pointerover', () => {
+            this.displayStats(unit);
+        });
+    }
+    
+    //Callback from the card class, shows valid placements for the card unit, BoardHighlights work the same way they do in genMoves, showing possible moves and self destructing when
+    //  placement is complete
+    //Additionally there is a boolean variable that lets the BoardHighlight know if the respective move has a parent and therefore whether is sould create a new piece when clicked or
+    //  move it's parent piece.
     playCard(card) {
         if (this.peiceClicked == true || this.currPlayer != card.player) {
             return;
@@ -337,15 +412,20 @@ class Play extends Phaser.Scene {
                 }
             }
         }
+        //Simple card cleanup
         card.setActive(false).setVisible(false)
 
     }
-
+    //Case for new piece generation, it will inherit the name from the BoardHighlight which it has in turn inherited from a card. If you look in the unit class all stats are determined
+    //  by this unit and stored as arrays allowing for very easy modification to unit stats and addition of new units.
+    //The piece is added not just to the board but also to the piece array for easy combat resolution by iterating over each unit and preforming all their respective combat actions.
     genPiece(x, y, name) {
         if (this.currPlayer == 0) {
             this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnit", 0, 0, x, y, name).setInteractive()
+            this.applyTextUpdate(this.board[x][y])
         } else {
             this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY + unitOffsetY + 60 * y, "blackUnit", 0, 1, x, y, name).setInteractive()
+            this.applyTextUpdate(this.board[x][y])
         }
         this.pieces.add(this.board[x][y])
         this.possibleMoves.clear(true, true);
@@ -353,6 +433,9 @@ class Play extends Phaser.Scene {
         this.movesCurrentTurn -= 1;
 
     }
+
+    //Simple cleanup, when preforming combat pieces are not immediately destroyed since they still have to resolve their attacks so they are instead added to the toBeCleaned array and
+    //  deleted at the end of the turn.
     doCleanup() {
         for (let i = 0; i < this.toBeCleaned.length; i++) {
             let x = this.toBeCleaned[i].boardX
@@ -362,34 +445,30 @@ class Play extends Phaser.Scene {
         }
         this.toBeCleaned = []
     }
-
+    
+    
+    //Updates all the stat display text with the stats of the unit the player is hovering.
     displayStats(unit) {
         if (unit.unitName == undefined) {
             var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name)
-            console.log("         ");
-            console.log("         ");
-            console.log("Piece Stats:")
-            console.log("Name: " + temp.unitName)
-            console.log("Attack: " + temp.attack)
-            console.log("Defense: " + temp.defense)
-            console.log("Range: " + temp.range)
-            console.log("Move Speed: " + temp.moveSpeed)
-            console.log("Flank Bonus: " + temp.flankBonus)
-            console.log("Support Bonus: " + temp.supportBonus)
+            this.nameText.setText("Name: " + temp.unitName);
+            this.attackText.setText("Attack: " + temp.attack);
+            this.defenseText.setText("Defense: " + temp.defense);
+            this.rangeText.setText("Range: " + temp.range);
+            this.speedText.setText("Move Speed: " + temp.moveSpeed);
+            this.flankText.setText("Flank Bonus: " + temp.flankBonus);
+            this.supportText.setText("Support Bonus: " + temp.supportBonus);
             temp.destroy()
 
             return;
         }
-        console.log("         ");
-        console.log("         ");
-        console.log("Piece Stats:")
-        console.log("Name: " + unit.unitName)
-        console.log("Attack: " + unit.attack)
-        console.log("Defense: " + unit.defense)
-        console.log("Range: " + unit.range)
-        console.log("Move Speed: " + unit.moveSpeed)
-        console.log("Flank Bonus: " + unit.flankBonus)
-        console.log("Support Bonus: " + unit.supportBonus)
+        this.nameText.setText("Name: " + unit.unitName)
+        this.attackText.setText("Attack: " + unit.attack)
+        this.defenseText.setText("Defense: " + unit.defense)
+        this.rangeText.setText("Range: " + unit.range)
+        this.speedText.setText("Move Speed: " + unit.moveSpeed)
+        this.flankText.setText("Flank Bonus: " + unit.flankBonus)
+        this.supportText.setText("Support Bonus: " + unit.supportBonus)
 
     }
 

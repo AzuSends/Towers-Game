@@ -51,6 +51,12 @@ class Unit extends Phaser.GameObjects.Sprite {
     return this.player;
   }
 
+  resetBonuses(){
+    this.attackBonus = 0;
+    this.defensePenalty = 0;
+
+  }
+
   giveSupport(ally) {
     ally.attackBonus += this.supportBonus
     if (this.player == 0) {

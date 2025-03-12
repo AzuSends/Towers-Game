@@ -8,7 +8,7 @@ class Menu extends Phaser.Scene {
         this.add.text(this.cameras.main.width / 2, 100, 'Towers', {
             fontSize: '64px',
             fill: '#fff',
-            fontFamily: 'Arial',
+            fontFamily: 'Times New Roman',
         }).setOrigin(0.5);
 
         // Play Button
