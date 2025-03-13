@@ -17,6 +17,8 @@ class Play extends Phaser.Scene {
         this.peiceClicked = false
         this.p1Deployed = 0;
         this.p2Deployed = 0;
+        this.p1UnitsLost = 0;
+        this.p2UnitsLost = 0;
 
         //Graphics Controller
         this.graphics = this.add.graphics();
@@ -84,8 +86,8 @@ class Play extends Phaser.Scene {
         let blackUnitCap = {
             fontFamily: 'Times New Roman',
             fontSize: '30px',
-            backgroundColor: '#000000',
-            color: '#ffffff',
+            backgroundColor: '#ffffff',
+            color: '#000000',
             align: 'center',
             padding: {
                 top: 4,
@@ -98,8 +100,8 @@ class Play extends Phaser.Scene {
         let whiteUnitCap = {
             fontFamily: 'Times New Roman',
             fontSize: '30px',
-            backgroundColor: '#ffffff',
-            color: '#000000',
+            backgroundColor: '#000000',
+            color: '#ffffff',
             align: 'center',
             padding: {
                 top: 4,
@@ -113,13 +115,12 @@ class Play extends Phaser.Scene {
 
         //Definitions so that text can be easily updted
         let textOffset = 35
-        this.statsText = this.add.text(3, 0, "Piece Stats:", statDisplayConfig)
         this.nameText = this.add.text(3, textOffset, "Name: ", statDisplayConfig)
         this.attackText = this.add.text(3, textOffset*2, "Attack: ", statDisplayConfig)
         this.defenseText = this.add.text(3, textOffset*3, "Defense: ", statDisplayConfig)
         this.rangeText = this.add.text(3, textOffset*4, "Range: ", statDisplayConfig)
         this.speedText = this.add.text(3, textOffset*5, "Move Speed: ", statDisplayConfig)
-        this.flankText = this.add.text(3, textOffset*6, "Flank Bonus: ", statDisplayConfig)
+        this.flankText = this.add.text(3, textOffset*6, "Flank Penalty: ", statDisplayConfig)
         this.supportText = this.add.text(3, textOffset*7, "Support Bonus: ", statDisplayConfig)
         this.whiteUnitCapText = this.add.text(1150, 5, this.p1Deployed + "/5", whiteUnitCap)
         this.blackUnitCapText = this.add.text(1050, 5, this.p2Deployed + "/5", blackUnitCap)
@@ -167,11 +168,13 @@ class Play extends Phaser.Scene {
         //Each player gets 3 moves per turn and the turn is complete when they have made their three moves.
         if (this.movesCurrentTurn == 0) {
             this.tradeTurn();
-            this.currPlayer = !this.currPlayer
-            this.movesCurrentTurn = this.movesPerTurn
-            this.doCombat()
+            this.currPlayer = !this.currPlayer;
+            this.movesCurrentTurn = this.movesPerTurn;
+            if(this.currPlayer == 0){
+                this.doCombat();
+            }
             this.doCleanup();
-            console.log("Turn Passed to Opponent")
+            console.log("Turn Passed to Opponent");
             this.turn += 1;
             
         }
@@ -451,6 +454,9 @@ class Play extends Phaser.Scene {
         if (this.peiceClicked == true || this.currPlayer != card.player) {
             return;
         }
+        if((this.currPlayer == 0 && this.p1Deployed >= 5) || (this.currPlayer == 1 && this.p2Deployed >= 5)){
+            return;
+        }
         this.peiceClicked = true
         for (let i = 0; i < 11; i++) {
             if (this.currPlayer == 0) {
@@ -476,14 +482,19 @@ class Play extends Phaser.Scene {
         if (this.currPlayer == 0) {
             this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY - unitOffsetY + 60 * y, "whiteUnit", 0, 0, x, y, name).setInteractive()
             this.applyTextUpdate(this.board[x][y])
+            this.p1Deployed += 1;
         } else {
             this.board[x][y] = new Unit(this, boardOffestX + 60 * x, boardOffsetY + unitOffsetY + 60 * y, "blackUnit", 0, 1, x, y, name).setInteractive()
             this.applyTextUpdate(this.board[x][y])
+            this.p2Deployed += 1;
         }
         this.pieces.add(this.board[x][y])
         this.possibleMoves.clear(true, true);
         this.peiceClicked = false;
         this.movesCurrentTurn -= 1;
+        this.blackUnitCapText.setText(this.p1Deployed + "/5")
+        this.whiteUnitCapText.setText(this.p2Deployed + "/5")
+
 
     }
 
@@ -494,6 +505,18 @@ class Play extends Phaser.Scene {
             let x = this.toBeCleaned[i].boardX
             let y = this.toBeCleaned[i].boardY
             this.board[x][y] = 0
+            if (this.toBeCleaned[i].player == 0){
+                this.p1UnitsLost += 1
+                if(p1UnitsLost >= 5){
+                    gameOver(0)
+                }
+            }  else {
+                this.p2UnitsLost += 1
+                if(this.p2UnitsLost >= 5){
+                    gameOver(1)
+                }
+            }
+
             this.pieces.remove(this.toBeCleaned[i], true, true);
         }
         this.toBeCleaned = []
@@ -509,7 +532,7 @@ class Play extends Phaser.Scene {
             this.defenseText.setText("Defense: " + temp.defense);
             this.rangeText.setText("Range: " + temp.range);
             this.speedText.setText("Move Speed: " + temp.moveSpeed);
-            this.flankText.setText("Flank Bonus: " + temp.flankBonus);
+            this.flankText.setText("Flank Penalty: " + temp.flankBonus);
             this.supportText.setText("Support Bonus: " + temp.supportBonus);
             temp.destroy()
 
@@ -520,7 +543,7 @@ class Play extends Phaser.Scene {
         this.defenseText.setText("Defense: " + unit.defense)
         this.rangeText.setText("Range: " + unit.range)
         this.speedText.setText("Move Speed: " + unit.moveSpeed)
-        this.flankText.setText("Flank Bonus: " + unit.flankBonus)
+        this.flankText.setText("Flank Penalty: " + unit.flankBonus)
         this.supportText.setText("Support Bonus: " + unit.supportBonus)
 
     }
@@ -530,6 +553,7 @@ class Play extends Phaser.Scene {
         this.p1Hand.setVisible(this.currPlayer)
         this.p2Hand.setVisible(!this.currPlayer)
     }
+    
 
 
 }
