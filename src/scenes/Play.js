@@ -15,6 +15,8 @@ class Play extends Phaser.Scene {
         this.movesCurrentTurn = 0;
         this.currPlayer = 1;
         this.peiceClicked = false
+        this.p1Deployed = 0;
+        this.p2Deployed = 0;
 
         //Graphics Controller
         this.graphics = this.add.graphics();
@@ -79,6 +81,35 @@ class Play extends Phaser.Scene {
             },
             fixedWidth: 0
         }
+        let blackUnitCap = {
+            fontFamily: 'Times New Roman',
+            fontSize: '30px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            align: 'center',
+            padding: {
+                top: 4,
+                bottom: 4,
+                left: 10,
+                right: 10,
+            },
+            fixedWidth: 0
+        }
+        let whiteUnitCap = {
+            fontFamily: 'Times New Roman',
+            fontSize: '30px',
+            backgroundColor: '#ffffff',
+            color: '#000000',
+            align: 'center',
+            padding: {
+                top: 4,
+                bottom: 4,
+                left: 10,
+                right: 10,
+            },
+            fixedWidth: 0
+        }
+
 
         //Definitions so that text can be easily updted
         let textOffset = 35
@@ -90,6 +121,9 @@ class Play extends Phaser.Scene {
         this.speedText = this.add.text(3, textOffset*5, "Move Speed: ", statDisplayConfig)
         this.flankText = this.add.text(3, textOffset*6, "Flank Bonus: ", statDisplayConfig)
         this.supportText = this.add.text(3, textOffset*7, "Support Bonus: ", statDisplayConfig)
+        this.whiteUnitCapText = this.add.text(1150, 5, this.p1Deployed + "/5", whiteUnitCap)
+        this.blackUnitCapText = this.add.text(1050, 5, this.p2Deployed + "/5", blackUnitCap)
+        
 
 
 
@@ -132,12 +166,14 @@ class Play extends Phaser.Scene {
         //  mostly control flow and checking adjacency etc.  
         //Each player gets 3 moves per turn and the turn is complete when they have made their three moves.
         if (this.movesCurrentTurn == 0) {
+            this.tradeTurn();
             this.currPlayer = !this.currPlayer
             this.movesCurrentTurn = this.movesPerTurn
             this.doCombat()
             this.doCleanup();
             console.log("Turn Passed to Opponent")
             this.turn += 1;
+            
         }
 
 
@@ -199,57 +235,74 @@ class Play extends Phaser.Scene {
     }
 
     flank(i, j) {
-        if (this.board[i - 1][j - 1] != 0 && this.board[i - 1][j - 1] != undefined) {
-            if (this.board[i - 1][j - 1].player != this.board[i][j].player) {
-                this.board[i][j].applyFlank(this.board[i - 1][j - 1])
+        if((i-1) >= 0 && (j-1) >= 0){
+            if (this.board[i - 1][j - 1] != 0 && this.board[i - 1][j - 1] != undefined) {
+                if (this.board[i - 1][j - 1].player != this.board[i][j].player) {
+                    this.board[i][j].applyFlank(this.board[i - 1][j - 1])
+                }
             }
         }
-        if (this.board[i - 1][j + 1] != 0 && this.board[i - 1][j + 1] != undefined) {
-            if (this.board[i - 1][j + 1].player != this.board[i][j].player) {
-                this.board[i][j].applyFlank(this.board[i - 1][j + 1])
+        if((j+1) <= 8 && (i-1) >= 0){        
+            if (this.board[i - 1][j + 1] != 0 && this.board[i - 1][j + 1] != undefined) {
+                if (this.board[i - 1][j + 1].player != this.board[i][j].player) {
+                    this.board[i][j].applyFlank(this.board[i - 1][j + 1])
+                }
             }
         }
-        if (this.board[i + 1][j - 1] != 0 && this.board[i + 1][j - 1] != undefined) {
-            if (this.board[i + 1][j - 1].player != this.board[i][j].player) {
-                this.board[i][j].applyFlank(this.board[i + 1][j - 1])
+        if((i+1) <= 10 && (j-1) >= 0){        
+            if (this.board[i + 1][j - 1] != 0 && this.board[i + 1][j - 1] != undefined) {
+                if (this.board[i + 1][j - 1].player != this.board[i][j].player) {
+                    this.board[i][j].applyFlank(this.board[i + 1][j - 1])
+                }
             }
         }
-        if (this.board[i + 1][j + 1] != 0 && this.board[i + 1][j + 1] != undefined) {
-            if (this.board[i + 1][j + 1].player != this.board[i][j].player) {
-                this.board[i][j].applyFlank(this.board[i + 1][j + 1])
+        if((j+1)<= 8 && (i+1) <= 10){
+            if (this.board[i + 1][j + 1] != 0 && this.board[i + 1][j + 1] != undefined) {
+                if (this.board[i + 1][j + 1].player != this.board[i][j].player) {
+                    this.board[i][j].applyFlank(this.board[i + 1][j + 1])
+                }
             }
         }
 
     }
 
     attack(i, j) {
-        if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
-            if (this.board[i - 1][j].player != this.board[i][j].player) {
-                if (this.board[i][j].fight(this.board[i - 1][j])) {
-                    this.toBeCleaned.push(this.board[i - 1][j])
-                }
-            }
-        }
-        if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
-            if (this.board[i][j - 1].player != this.board[i][j].player) {
-                if (this.board[i][j].fight(this.board[i][j - 1])) {
-                    this.toBeCleaned.push(this.board[i][j - 1])
-                }
-            }
-        }
-        if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
-            if (this.board[i + 1][j].player != this.board[i][j].player) {
 
-                if (this.board[i][j].fight(this.board[i + 1][j])) {
-                    this.toBeCleaned.push(this.board[i + 1][j])
+        if((i-1) >= 0){
+            if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
+                if (this.board[i - 1][j].player != this.board[i][j].player) {
+                    if (this.board[i][j].fight(this.board[i - 1][j])) {
+                        this.toBeCleaned.push(this.board[i - 1][j])
+                    }
                 }
             }
         }
-        if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
-            if (this.board[i][j + 1].player != this.board[i][j].player) {
+        if((j-1) >= 0){
+            if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
+                if (this.board[i][j - 1].player != this.board[i][j].player) {
+                    if (this.board[i][j].fight(this.board[i][j - 1])) {
+                        this.toBeCleaned.push(this.board[i][j - 1])
+                    }
+                }
+            }
+        }
+        if((i+1) <= 10){
+            if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
+                if (this.board[i + 1][j].player != this.board[i][j].player) {
 
-                if (this.board[i][j].fight(this.board[i][j + 1])) {
-                    this.toBeCleaned.push(this.board[i][j + 1])
+                    if (this.board[i][j].fight(this.board[i + 1][j])) {
+                        this.toBeCleaned.push(this.board[i + 1][j])
+                    }
+                }
+            }
+        }
+        if((j+1)<= 8){   
+            if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
+                if (this.board[i][j + 1].player != this.board[i][j].player) {
+
+                    if (this.board[i][j].fight(this.board[i][j + 1])) {
+                        this.toBeCleaned.push(this.board[i][j + 1])
+                    }
                 }
             }
         }
@@ -472,6 +525,11 @@ class Play extends Phaser.Scene {
 
     }
 
+
+    tradeTurn(){
+        this.p1Hand.setVisible(this.currPlayer)
+        this.p2Hand.setVisible(!this.currPlayer)
+    }
 
 
 }

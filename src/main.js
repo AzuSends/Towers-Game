@@ -12,6 +12,7 @@ let config = {
 let game = new Phaser.Game(config)
 
 const boardOffestX = 339;
+const squareSize = 60;
 const boardOffsetY = 54;
 const unitOffsetY = 15;
 
