@@ -18,7 +18,7 @@ class Play extends Phaser.Scene {
 
         //Graphics Controller
         this.graphics = this.add.graphics();
-        
+
         //Groups for managing class instances
         this.pieces = this.add.group();
         this.p1Hand = this.add.group();
@@ -32,24 +32,24 @@ class Play extends Phaser.Scene {
         this.graphics.generateTexture("squareTextureGreen", 57, 57)
 
         this.graphics.fillStyle(0x71acf0, 1);
-        this.graphics.fillRect(0, 0, 57, 57); 
+        this.graphics.fillRect(0, 0, 57, 57);
         this.graphics.generateTexture("squareTexture", 57, 57)
 
-        this.graphics.fillStyle(0x000000, 1); 
+        this.graphics.fillStyle(0x000000, 1);
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j (reference)
         this.graphics.generateTexture("blackUnit", 57, 26.5)
         this.graphics.clear();
 
-        this.graphics.fillStyle(0x000000, 0.3); 
+        this.graphics.fillStyle(0x000000, 0.3);
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 55+60j
         this.graphics.generateTexture("blackUnitTemp", 57, 26.5)
 
-        this.graphics.fillStyle(0xffffff, 1); 
+        this.graphics.fillStyle(0xffffff, 1);
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
         this.graphics.generateTexture("whiteUnit", 57, 26.5)
         this.graphics.clear();
 
-        this.graphics.fillStyle(0xffffff, 0.3); 
+        this.graphics.fillStyle(0xffffff, 0.3);
         this.graphics.fillRect(0, 0, 57, 26.5); //310 + 60i, 25+60j
         this.graphics.generateTexture("whiteUnitTemp", 57, 26.5)
         this.graphics.clear();
@@ -74,8 +74,8 @@ class Play extends Phaser.Scene {
             color: '#843605',
             align: 'right',
             padding: {
-              top: 5,
-              bottom: 5,
+                top: 5,
+                bottom: 5,
             },
             fixedWidth: 0
         }
@@ -84,12 +84,12 @@ class Play extends Phaser.Scene {
         let textOffset = 35
         this.statsText = this.add.text(3, 0, "Piece Stats:", statDisplayConfig)
         this.nameText = this.add.text(3, textOffset, "Name: ", statDisplayConfig)
-        this.attackText = this.add.text(3, textOffset*2, "Attack: ", statDisplayConfig)
-        this.defenseText = this.add.text(3, textOffset*3, "Defense: ", statDisplayConfig)
-        this.rangeText = this.add.text(3, textOffset*4, "Range: ", statDisplayConfig)
-        this.speedText = this.add.text(3, textOffset*5, "Move Speed: ", statDisplayConfig)
-        this.flankText = this.add.text(3, textOffset*6, "Flank Bonus: ", statDisplayConfig)
-        this.supportText = this.add.text(3, textOffset*7, "Support Bonus: ", statDisplayConfig)
+        this.attackText = this.add.text(3, textOffset * 2, "Attack: ", statDisplayConfig)
+        this.defenseText = this.add.text(3, textOffset * 3, "Defense: ", statDisplayConfig)
+        this.rangeText = this.add.text(3, textOffset * 4, "Range: ", statDisplayConfig)
+        this.speedText = this.add.text(3, textOffset * 5, "Move Speed: ", statDisplayConfig)
+        this.flankText = this.add.text(3, textOffset * 6, "Flank Bonus: ", statDisplayConfig)
+        this.supportText = this.add.text(3, textOffset * 7, "Support Bonus: ", statDisplayConfig)
 
 
 
@@ -125,6 +125,7 @@ class Play extends Phaser.Scene {
         this.drawHandP2()
 
 
+
     }
     update() {
 
@@ -158,7 +159,7 @@ class Play extends Phaser.Scene {
             this.flank(child.boardX, child.boardY)
             //Each piece checks if it is on high group and applies the respective bonuses
             this.checkHighGround(child.boardX, child.boardY)
-            
+
         }
         for (const child of this.pieces.getChildren()) { //Seperate loop to allow all stat changes to be preformed first
             //Compares combat stats of orthogonally adjacent enemies after bonuses and penalties, units are destroyed if the attacking unit's attack is greater than their defense
@@ -302,6 +303,28 @@ class Play extends Phaser.Scene {
 
     }
 
+
+    genAttacks(x, y, range, attackerX, attackerY) {
+        let attacker = this.board[attackerX][attackerY]
+        if (range == -1) {
+            return;
+        }
+        if (x >= 0 && x <= 10) {
+            let defender = this.board[x][y]
+            if (defender instanceof Unit && defender.player != attacker.player) {
+                if (attacker.fight(defender)) {
+                    this.toBeCleaned.push(defender);
+                }
+            }
+        }
+
+        this.genAttacks(x + 1, y, range - 1, attackerX, attackerY)
+        this.genAttacks(x - 1, y, range - 1, attackerX, attackerY)
+        this.genAttacks(x, y + 1, range - 1, attackerX, attackerY)
+        this.genAttacks(x, y - 1, range - 1, attackerX, attackerY)
+
+    }
+
     //Cleanup for temp pieces 
     finalizePlacement(x, y) {
         this.possibleMoves.clear(true, true);
@@ -389,7 +412,7 @@ class Play extends Phaser.Scene {
             this.displayStats(unit);
         });
     }
-    
+
     //Callback from the card class, shows valid placements for the card unit, BoardHighlights work the same way they do in genMoves, showing possible moves and self destructing when
     //  placement is complete
     //Additionally there is a boolean variable that lets the BoardHighlight know if the respective move has a parent and therefore whether is sould create a new piece when clicked or
@@ -445,8 +468,8 @@ class Play extends Phaser.Scene {
         }
         this.toBeCleaned = []
     }
-    
-    
+
+
     //Updates all the stat display text with the stats of the unit the player is hovering.
     displayStats(unit) {
         if (unit.unitName == undefined) {

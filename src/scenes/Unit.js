@@ -11,7 +11,7 @@ class Unit extends Phaser.GameObjects.Sprite {
 
     switch (this.unitName) {
       case "Cavilry":
-        this.stats = [3, 0, 1, 0, 1, 2, 2, 1, 0]
+        this.stats = [3, 0, 1, 0, 5, 2, 2, 1, 0]
         break;
       case "Infantry":
         this.stats = [2, 0, 2, 0, 1, 2, 1, 2, 0]
@@ -51,7 +51,7 @@ class Unit extends Phaser.GameObjects.Sprite {
     return this.player;
   }
 
-  resetBonuses(){
+  resetBonuses() {
     this.attackBonus = 0;
     this.defensePenalty = 0;
 
