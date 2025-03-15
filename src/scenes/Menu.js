@@ -2,6 +2,11 @@ class Menu extends Phaser.Scene {
     constructor() {
         super("menuScene");
     }
+    preload() {
+        this.load.audio('click', './assets/click.wav');
+        this.load.audio('clash', './assets/clash.mp3')
+        this.load.audio('drum-bgm', './assets/drum-bgm.wav')
+    }
 
     create() {
         // Title Text
@@ -19,7 +24,7 @@ class Menu extends Phaser.Scene {
             padding: { x: 20, y: 10 },
             backgroundColor: '#333',
         }).setOrigin(0.5).setInteractive();
-        
+
         const tutorialButton = this.add.text(this.cameras.main.width / 2, 400, 'Tutorial', {
             fontSize: '32px',
             fill: '#fff',

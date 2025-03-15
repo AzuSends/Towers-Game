@@ -68,6 +68,19 @@ class Play extends Phaser.Scene {
         this.graphics.generateTexture("cardTempBlack", 135, 189)
         this.graphics.destroy();
 
+        this.click = this.sound.add('click', {
+            volume: 0.5,
+            loop: false
+        });
+        this.clash = this.sound.add('clash', {
+            volume: 0.5,
+            loop: false
+        });
+        this.bgm = this.sound.add('drum-bgm', {
+            volume: 0.5,
+            loop: true
+        });
+
 
 
         //Simple setup for piece stat display
@@ -116,24 +129,15 @@ class Play extends Phaser.Scene {
         //Definitions so that text can be easily updted
         let textOffset = 35
         this.nameText = this.add.text(3, textOffset, "Name: ", statDisplayConfig)
-<<<<<<< HEAD
         this.attackText = this.add.text(3, textOffset * 2, "Attack: ", statDisplayConfig)
         this.defenseText = this.add.text(3, textOffset * 3, "Defense: ", statDisplayConfig)
         this.rangeText = this.add.text(3, textOffset * 4, "Range: ", statDisplayConfig)
         this.speedText = this.add.text(3, textOffset * 5, "Move Speed: ", statDisplayConfig)
-        this.flankText = this.add.text(3, textOffset * 6, "Flank Bonus: ", statDisplayConfig)
+        this.flankText = this.add.text(3, textOffset * 6, "Flank Penalty: ", statDisplayConfig)
         this.supportText = this.add.text(3, textOffset * 7, "Support Bonus: ", statDisplayConfig)
-=======
-        this.attackText = this.add.text(3, textOffset*2, "Attack: ", statDisplayConfig)
-        this.defenseText = this.add.text(3, textOffset*3, "Defense: ", statDisplayConfig)
-        this.rangeText = this.add.text(3, textOffset*4, "Range: ", statDisplayConfig)
-        this.speedText = this.add.text(3, textOffset*5, "Move Speed: ", statDisplayConfig)
-        this.flankText = this.add.text(3, textOffset*6, "Flank Penalty: ", statDisplayConfig)
-        this.supportText = this.add.text(3, textOffset*7, "Support Bonus: ", statDisplayConfig)
         this.whiteUnitCapText = this.add.text(1150, 5, this.p1Deployed + "/5", whiteUnitCap)
         this.blackUnitCapText = this.add.text(1050, 5, this.p2Deployed + "/5", blackUnitCap)
-        
->>>>>>> 58558f3d4c56dbeadea164cf608d3ab544afbe19
+
 
 
 
@@ -167,11 +171,12 @@ class Play extends Phaser.Scene {
         //Draws card into each players hand, check function for more info. 
         this.drawHandP1()
         this.drawHandP2()
-
+        this.bgm.play()
 
 
     }
     update() {
+
 
         //Primary game loop. This is very simple since most of the state is managed by the individual pieces. doCombat and the other funtions it calls are rather wordy but that is 
         //  mostly control flow and checking adjacency etc.  
@@ -180,13 +185,14 @@ class Play extends Phaser.Scene {
             this.tradeTurn();
             this.currPlayer = !this.currPlayer;
             this.movesCurrentTurn = this.movesPerTurn;
-            if(this.currPlayer == 0){
+            if (this.currPlayer == 0) {
+                if (this.turn != 0) { this.clash.play(); }
                 this.doCombat();
             }
             this.doCleanup();
             console.log("Turn Passed to Opponent");
             this.turn += 1;
-            
+
         }
 
 
@@ -211,7 +217,7 @@ class Play extends Phaser.Scene {
         }
         for (const child of this.pieces.getChildren()) { //Seperate loop to allow all stat changes to be preformed first
             //Compares combat stats of orthogonally adjacent enemies after bonuses and penalties, units are destroyed if the attacking unit's attack is greater than their defense
-            this.attack(child.boardX, child.boardY)
+            this.genAttacks(child.boardX, child.boardY, child.range, child.boardX, child.boardY)
         }
 
     }
@@ -248,28 +254,28 @@ class Play extends Phaser.Scene {
     }
 
     flank(i, j) {
-        if((i-1) >= 0 && (j-1) >= 0){
+        if ((i - 1) >= 0 && (j - 1) >= 0) {
             if (this.board[i - 1][j - 1] != 0 && this.board[i - 1][j - 1] != undefined) {
                 if (this.board[i - 1][j - 1].player != this.board[i][j].player) {
                     this.board[i][j].applyFlank(this.board[i - 1][j - 1])
                 }
             }
         }
-        if((j+1) <= 8 && (i-1) >= 0){        
+        if ((j + 1) <= 8 && (i - 1) >= 0) {
             if (this.board[i - 1][j + 1] != 0 && this.board[i - 1][j + 1] != undefined) {
                 if (this.board[i - 1][j + 1].player != this.board[i][j].player) {
                     this.board[i][j].applyFlank(this.board[i - 1][j + 1])
                 }
             }
         }
-        if((i+1) <= 10 && (j-1) >= 0){        
+        if ((i + 1) <= 10 && (j - 1) >= 0) {
             if (this.board[i + 1][j - 1] != 0 && this.board[i + 1][j - 1] != undefined) {
                 if (this.board[i + 1][j - 1].player != this.board[i][j].player) {
                     this.board[i][j].applyFlank(this.board[i + 1][j - 1])
                 }
             }
         }
-        if((j+1)<= 8 && (i+1) <= 10){
+        if ((j + 1) <= 8 && (i + 1) <= 10) {
             if (this.board[i + 1][j + 1] != 0 && this.board[i + 1][j + 1] != undefined) {
                 if (this.board[i + 1][j + 1].player != this.board[i][j].player) {
                     this.board[i][j].applyFlank(this.board[i + 1][j + 1])
@@ -281,7 +287,7 @@ class Play extends Phaser.Scene {
 
     attack(i, j) {
 
-        if((i-1) >= 0){
+        if ((i - 1) >= 0) {
             if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
                 if (this.board[i - 1][j].player != this.board[i][j].player) {
                     if (this.board[i][j].fight(this.board[i - 1][j])) {
@@ -290,7 +296,7 @@ class Play extends Phaser.Scene {
                 }
             }
         }
-        if((j-1) >= 0){
+        if ((j - 1) >= 0) {
             if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
                 if (this.board[i][j - 1].player != this.board[i][j].player) {
                     if (this.board[i][j].fight(this.board[i][j - 1])) {
@@ -299,7 +305,7 @@ class Play extends Phaser.Scene {
                 }
             }
         }
-        if((i+1) <= 10){
+        if ((i + 1) <= 10) {
             if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
                 if (this.board[i + 1][j].player != this.board[i][j].player) {
 
@@ -309,7 +315,7 @@ class Play extends Phaser.Scene {
                 }
             }
         }
-        if((j+1)<= 8){   
+        if ((j + 1) <= 8) {
             if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
                 if (this.board[i][j + 1].player != this.board[i][j].player) {
 
@@ -335,6 +341,7 @@ class Play extends Phaser.Scene {
         var peice = this.board[x][y]
         if (peice != 0 && peice != undefined) {
             if (peice.player == this.currPlayer) {
+                this.click.play();
                 this.peiceClicked = true
                 this.clickedPiece = this.board[x][y]
                 this.displayStats(this.clickedPiece)
@@ -457,6 +464,7 @@ class Play extends Phaser.Scene {
                 duration: 300
 
             });
+            this.click.play();
         });
     }
 
@@ -486,7 +494,7 @@ class Play extends Phaser.Scene {
         if (this.peiceClicked == true || this.currPlayer != card.player) {
             return;
         }
-        if((this.currPlayer == 0 && this.p1Deployed >= 5) || (this.currPlayer == 1 && this.p2Deployed >= 5)){
+        if ((this.currPlayer == 0 && this.p1Deployed >= 5) || (this.currPlayer == 1 && this.p2Deployed >= 5)) {
             return;
         }
         this.peiceClicked = true
@@ -537,20 +545,21 @@ class Play extends Phaser.Scene {
             let x = this.toBeCleaned[i].boardX
             let y = this.toBeCleaned[i].boardY
             this.board[x][y] = 0
-            if (this.toBeCleaned[i].player == 0){
+            if (this.toBeCleaned[i].player == 0) {
                 this.p1UnitsLost += 1
-                if(p1UnitsLost >= 5){
-                    gameOver(0)
+                if (this.p1UnitsLost >= 5) {
+                    this.gameOver(0)
                 }
-            }  else {
+            } else {
                 this.p2UnitsLost += 1
-                if(this.p2UnitsLost >= 5){
-                    gameOver(1)
+                if (this.p2UnitsLost >= 5) {
+                    this.gameOver(1)
                 }
             }
 
-            this.pieces.remove(this.toBeCleaned[i], true, true);
+
         }
+        this.pieces.clear();
         this.toBeCleaned = []
     }
 
@@ -581,11 +590,38 @@ class Play extends Phaser.Scene {
     }
 
 
-    tradeTurn(){
+    tradeTurn() {
         this.p1Hand.setVisible(this.currPlayer)
         this.p2Hand.setVisible(!this.currPlayer)
     }
-    
+
+    gameOver(losingPlayer) {
+        let gameOverTextConfig = {
+            fontFamily: 'Times New Roman',
+            fontSize: 'bold 36px',
+            backgroundColor: 'rgb(250,181,133)',
+            color: '#843605',
+            align: 'right',
+            padding: {
+                top: 5,
+                bottom: 5,
+                left: 0,
+            },
+            fixedWidth: 0
+        }
+        if (losingPlayer == 0) {
+            this.gameOverText = this.add.text(this.cameras.main.width / 2, (this.cameras.main.height / 3) - 5, "The Singers Win!", gameOverTextConfig).setOrigin(0.5, 0.5)
+
+        } else if (losingPlayer == 1) {
+            this.gameOverText = this.add.text(this.cameras.main.width / 2, (this.cameras.main.height / 3) - 5, "The Alethi Win!", gameOverTextConfig).setOrigin(0.5, 0.5)
+            this.gameOverText.setBackgroundColor("#76c2be");
+            this.gameOverText.setColor("#333333")
+        }
+        this.pieces.setVisible(false);
+        this.p1Hand.setVisible(false);
+        this.p2Hand.setVisible(false);
+    }
+
 
 
 }
