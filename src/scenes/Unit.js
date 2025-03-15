@@ -11,19 +11,22 @@ class Unit extends Phaser.GameObjects.Sprite {
 
     switch (this.unitName) {
       case "Cavilry":
-        this.stats = [3, 0, 1, 0, 5, 2, 2, 1, 0]
+        this.stats = [3, 0, 1, 0, 1, 2, 2, 1, 0]
         break;
       case "Infantry":
         this.stats = [2, 0, 2, 0, 1, 2, 1, 2, 0]
         break;
       case "Heavy Infantry":
-        this.stats = [3, 0, 3, 0, 1, 1, 3, 2, 0]
+        this.stats = [5, 0, 2, 0, 1, 1, 3, 2, 0]
         break;
       case "Pike Block":
         this.stats = [2, 0, 4, 0, 1, 1, 2, 3, 0]
         break;
+      case "Archer":
+        this.stats = [2, 0, 1, 0, 2, 1, 0, 0, 1]
+        break;
       default:
-        console.log("Invalid unit name")
+        console.log("Invalid unit name: " + this.unitName)
         break;
     }
     this.attack = this.stats[0];
