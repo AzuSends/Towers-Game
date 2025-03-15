@@ -58,7 +58,7 @@ class Unit extends Phaser.GameObjects.Sprite {
   }
 
   giveSupport(ally) {
-    ally.attackBonus += this.supportBonus
+    ally.defensePenalty += this.supportBonus
     if (this.player == 0) {
       console.log("Alethi " + this.unitName + " applied support to ally " + ally.unitName)
     }
@@ -79,7 +79,7 @@ class Unit extends Phaser.GameObjects.Sprite {
   }
 
   fight(enemy) {
-    if ((this.attack + this.attackBonus) >= (enemy.defense - enemy.defensePenalty)) {
+    if ((this.attack + this.attackBonus) >= (enemy.defense + enemy.defensePenalty)) {
       if (this.player == 0) {
         console.log("Alethi " + this.unitName + " defeated an enemy " + enemy.unitName)
       }
@@ -99,5 +99,6 @@ class Unit extends Phaser.GameObjects.Sprite {
   handleClick() {
     this.scene.boardClick(this.boardX, this.boardY);
   }
+
 
 }
