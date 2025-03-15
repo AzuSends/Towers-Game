@@ -138,6 +138,15 @@ class Play extends Phaser.Scene {
         this.supportText = this.add.text(3, textOffset * 7, "Support Bonus: ", statDisplayConfig)
         this.whiteUnitCapText = this.add.text(1150, 5, this.p1Deployed + "/5", whiteUnitCap)
         this.blackUnitCapText = this.add.text(1050, 5, this.p2Deployed + "/5", blackUnitCap)
+        whiteUnitCap.backgroundColor = "";
+        this.timerText = this.add.text(1065, 75, 'Time: ' + timer, whiteUnitCap);
+
+        this.timerEvent = this.time.addEvent({
+            delay: 1000,
+            callback: this.onTimerTick,
+            callbackScope: this,
+            loop: true,
+        });
 
 
 
@@ -193,6 +202,8 @@ class Play extends Phaser.Scene {
             this.doCleanup();
             console.log("Turn Passed to Opponent");
             this.turn += 1;
+            timer = 60
+            this.timerText.setText('Time: ' + timer);
 
         }
 
@@ -379,7 +390,7 @@ class Play extends Phaser.Scene {
     //Creates all the cards, only the piece name is required since stats are all managed in the unit class when the card becomes a unit and only depends on the piece name.
     //  A tween is given to each card causing them to slide up and down on mouse over.  
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "Cavilry", 0).setInteractive();
+        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calvary", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)
@@ -401,7 +412,7 @@ class Play extends Phaser.Scene {
         this.p1Hand.add(archerCard)
     }
     drawHandP2() {
-        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "Cavilry", 1).setInteractive();
+        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calvary", 1).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p2Hand.add(calvCard)
@@ -604,6 +615,17 @@ class Play extends Phaser.Scene {
         this.menuButton.on('pointerdown', () => {
             this.scene.start('menuScene');
         });
+    }
+
+    onTimerTick(){
+        timer--;
+        this.timerText.setText('Time: ' + timer);
+
+        if (timer<= 0){
+            this.movesCurrentTurn = 0;
+            timer = 60;
+            this.timerText.setText('Time: ' + timer);
+        }
     }
 
 

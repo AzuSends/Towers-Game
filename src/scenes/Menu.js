@@ -6,6 +6,11 @@ class Menu extends Phaser.Scene {
         this.load.audio('click', './assets/click.wav');
         this.load.audio('clash', './assets/clash.mp3')
         this.load.audio('drum-bgm', './assets/drum-bgm.wav')
+
+        this.load.image('archerCardSinger', './assets/archerCardSinger.png')
+        this.load.image('archerCardAlethi', './assets/archerCardSinger.png')
+
+
     }
 
     create() {

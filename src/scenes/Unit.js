@@ -10,7 +10,7 @@ class Unit extends Phaser.GameObjects.Sprite {
     this.unitName = unitName
 
     switch (this.unitName) {
-      case "Cavilry":
+      case "calvary":
         this.stats = [3, 0, 1, 0, 1, 2, 2, 1, 0]
         break;
       case "Infantry":
