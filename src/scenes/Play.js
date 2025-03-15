@@ -390,7 +390,7 @@ class Play extends Phaser.Scene {
     //Creates all the cards, only the piece name is required since stats are all managed in the unit class when the card becomes a unit and only depends on the piece name.
     //  A tween is given to each card causing them to slide up and down on mouse over.  
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "calvary", 0).setInteractive();
+        var calvCard = new Card(this, 125, 700, "calvaryCardAlethi", 0, "calvary", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)

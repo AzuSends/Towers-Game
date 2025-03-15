@@ -8,7 +8,16 @@ class Menu extends Phaser.Scene {
         this.load.audio('drum-bgm', './assets/drum-bgm.wav')
 
         this.load.image('archerCardSinger', './assets/archerCardSinger.png')
-        this.load.image('archerCardAlethi', './assets/archerCardSinger.png')
+        this.load.image('archerCardAlethi', './assets/archerCardAlethi.png')
+        this.load.image('infantryCardSinger', './assets/infantryCardSinger.png')
+        this.load.image('infantryCardAlethi', './assets/infantryCardAlethi.png')
+        this.load.image('heavyInfantryCardSinger', './assets/heavyInfantryCardSinger.png')
+        this.load.image('heavyInfantryCardAlethi', './assets/heavyInfantryCardAlethi.png')
+        this.load.image('calvaryCardSinger', './assets/calvaryCardSinger.png')
+        this.load.image('calvaryCardAlethi', './assets/calvaryCardAlethi.png')
+        this.load.image('pikeCardSinger', './assets/pikeCardSinger.png')
+        this.load.image('pikeCardAlethi', './assets/pikeCardAlethi.png')
+
 
 
     }
