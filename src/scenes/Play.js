@@ -567,8 +567,8 @@ class Play extends Phaser.Scene {
     //Updates all the stat display text with the stats of the unit the player is hovering.
     displayStats(unit) {
         if (unit.unitName == undefined) {
-            var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name)
-            this.nameText.setText("Name: " + temp.unitName);
+            var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name) //Due to stats being tied to the unit's name in order to get the stats for a card easily we can create a
+            this.nameText.setText("Name: " + temp.unitName); //                     temporary version of that unit to pull the stats from then destroy it.
             this.attackText.setText("Attack: " + temp.attack);
             this.defenseText.setText("Defense: " + temp.defense);
             this.rangeText.setText("Range: " + temp.range);
