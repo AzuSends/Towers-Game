@@ -21,6 +21,8 @@ class BoardHighlight extends Phaser.GameObjects.Sprite {
     return this.player;
   }
 
+  //Since BoardHighlights work as a way to show the player where they can move or place a piece we need a way to determine whether a piece is being moved or placed so
+  //  we simply tell the piece whether it has a parent or not so we know if we should finalize the movement of the existing piece or generate a new piece on the board.
   handleClick() {
     if (this.hasParent == true) {
       this.scene.finalizePlacement(this.boardX, this.boardY);

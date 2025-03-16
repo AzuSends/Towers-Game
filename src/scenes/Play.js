@@ -69,6 +69,8 @@ class Play extends Phaser.Scene {
         this.graphics.generateTexture("cardTempBlack", 135, 189)
         this.graphics.destroy();
 
+        //Sound definitions
+
         this.click = this.sound.add('click', {
             volume: 0.5,
             loop: false
@@ -141,6 +143,7 @@ class Play extends Phaser.Scene {
         whiteUnitCap.backgroundColor = "";
         this.timerText = this.add.text(1065, 75, 'Time: ' + timer, whiteUnitCap);
 
+        //simple timer tick that decrements and updates our timer text which you can see above on line 144. Looped so that the timer doesn't stop ticking after one loop lol
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: this.onTimerTick,
@@ -229,12 +232,15 @@ class Play extends Phaser.Scene {
         }
         for (const child of this.pieces.getChildren()) { //Seperate loop to allow all stat changes to be preformed first
             //Compares combat stats of orthogonally adjacent enemies after bonuses and penalties, units are destroyed if the attacking unit's attack is greater than their defense
+            //  unitAttacking flag prevents a unit attacking the same enemy additional times.
             this.unitAttacking = true
             this.genAttacks(child.boardX, child.boardY, child.range, child.boardX, child.boardY)
         }
 
     }
 
+    //i,j necesacially defines a piece based on how it is called so we just have to check adjacent board spaces for pieces and check if there is an ally there. Then we pass the
+    //ally to the respective unit and have them apply support bonuses
     support(i, j) {
         if (i - 1 >= 0) {
             if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
@@ -265,7 +271,7 @@ class Play extends Phaser.Scene {
             }
         }
     }
-
+    //Same as support just with diagonal units and enemies instead of allies 
     flank(i, j) {
         if ((i - 1) >= 0 && (j - 1) >= 0) {
             if (this.board[i - 1][j - 1] != 0 && this.board[i - 1][j - 1] != undefined) {
@@ -298,7 +304,7 @@ class Play extends Phaser.Scene {
 
     }
 
-
+    //Checks terrain map for high ground and lets a unit give itself it's high ground bonus if it's on high ground 
     checkHighGround(i, j) {
         if (this.terrain[i][j] == 1) {
             this.board[i][j].highGround();
@@ -347,7 +353,10 @@ class Play extends Phaser.Scene {
 
     }
 
-
+    //Origionally attacks were done simillarly to the support function however when adding the first ranged unit, the archer, I though checking all the possible squares it could attack
+    //  with nested if statments would be horribly painful so I instead opted to adapt the movement function to instead work for attacks. This also allows for units of any range too
+    //  including defensive units with a range of 0 such as a struture even, and high range units. It also would not be too hard to add a minimum range or even a close range and long
+    //  range difference. 
     genAttacks(x, y, range, attackerX, attackerY) {
         let attacker = this.board[attackerX][attackerY]
         if (range == -1) {
@@ -539,11 +548,11 @@ class Play extends Phaser.Scene {
                     this.gameOver(1)
                 }
             }
-            this.pieces.remove(this.toBeCleaned[i],true,true);
+            this.pieces.remove(this.toBeCleaned[i], true, true);
 
         }
 
-        
+
         this.toBeCleaned = []
     }
 
@@ -573,12 +582,11 @@ class Play extends Phaser.Scene {
 
     }
 
-
     tradeTurn() {
         this.p1Hand.setVisible(this.currPlayer)
         this.p2Hand.setVisible(!this.currPlayer)
     }
-
+    //Nothing fancy here, hides all the pieces and throws some colored text up on screen based on who won.
     gameOver(losingPlayer) {
         let gameOverTextConfig = {
             fontFamily: 'Times New Roman',
@@ -616,12 +624,12 @@ class Play extends Phaser.Scene {
             this.scene.start('menuScene');
         });
     }
-
-    onTimerTick(){
+    //timer callback.
+    onTimerTick() {
         timer--;
         this.timerText.setText('Time: ' + timer);
 
-        if (timer<= 0){
+        if (timer <= 0) {
             this.movesCurrentTurn = 0;
             timer = 60;
             this.timerText.setText('Time: ' + timer);

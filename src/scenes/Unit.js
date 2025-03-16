@@ -8,7 +8,9 @@ class Unit extends Phaser.GameObjects.Sprite {
 
     this.on('pointerup', this.handleClick, this);
     this.unitName = unitName
-
+    //When the unit is created we give it stats based on the card name it was created from.
+    //This let's us avoid passing stats from the card to the unit.
+    //Also this array method of determining stats in incredibly modular and very simple compared to some sort of nasty set of if statments 
     switch (this.unitName) {
       case "Calvary":
         this.stats = [3, 0, 1, 0, 1, 2, 2, 1, 0]
@@ -53,13 +55,13 @@ class Unit extends Phaser.GameObjects.Sprite {
   ownedBy() {
     return this.player;
   }
-
+  //Makes sure stat changed don't carry over between turns
   resetBonuses() {
     this.attackBonus = 0;
     this.defensePenalty = 0;
 
   }
-
+  //Stat changes and combat are handled here since it cleans up the code and also allows for simple changes or expansion on supporting, flanking, and fighting for differenent units. 
   giveSupport(ally) {
     ally.defensePenalty += this.supportBonus
     if (this.player == 0) {

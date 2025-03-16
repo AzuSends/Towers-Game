@@ -19,6 +19,8 @@ class BoardSquare extends Phaser.GameObjects.Sprite {
     return this.player;
   }
 
+  //Since unit game objects don't take up entire board squares in the game but we want players to be able to click anywhere on the square to make a move we simply handle board clicks
+  //  and piece clicks the same way and just return cordinates to the boardClick functions
   handleClick() {
     this.scene.boardClick(this.boardX, this.boardY);
   }
