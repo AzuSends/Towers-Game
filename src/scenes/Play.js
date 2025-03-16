@@ -390,45 +390,45 @@ class Play extends Phaser.Scene {
     //Creates all the cards, only the piece name is required since stats are all managed in the unit class when the card becomes a unit and only depends on the piece name.
     //  A tween is given to each card causing them to slide up and down on mouse over.  
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "calvaryCardAlethi", 0, "calvary", 0).setInteractive();
+        var calvCard = new Card(this, 125, 700, "calvaryCardAlethi", 0, "Calvary", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)
-        var infCard = new Card(this, 275, 700, "cardTempWhite", 0, "Infantry", 0).setInteractive();
+        var infCard = new Card(this, 275, 700, "infantryCardAlethi", 0, "Infantry", 0).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p1Hand.add(infCard)
-        var infHeavyCard = new Card(this, 425, 700, "cardTempWhite", 0, "Heavy Infantry", 0).setInteractive();
+        var infHeavyCard = new Card(this, 425, 700, "heavyInfantryCardAlethi", 0, "Heavy Infantry", 0).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p1Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 575, 700, "cardTempWhite", 0, "Pike Block", 0).setInteractive();
+        var pikeCard = new Card(this, 575, 700, "pikeCardAlethi", 0, "Pike Block", 0).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p1Hand.add(pikeCard)
-        var archerCard = new Card(this, 725, 700, "cardTempWhite", 0, "Archer", 0).setInteractive();
+        var archerCard = new Card(this, 725, 700, "archerCardAlethi", 0, "Archer", 0).setInteractive();
         this.applySlideTweenUp(archerCard)
         this.applySlideTweenDown(archerCard)
         this.p1Hand.add(archerCard)
     }
     drawHandP2() {
-        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calvary", 1).setInteractive();
+        var calvCard = new Card(this, 705, 700, "calvaryCardSinger", 0, "Calvary", 1).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p2Hand.add(calvCard)
-        var infCard = new Card(this, 855, 700, "cardTempBlack", 0, "Infantry", 1).setInteractive();
+        var infCard = new Card(this, 855, 700, "infantryCardSinger", 0, "Infantry", 1).setInteractive();
         this.applySlideTweenUp(infCard)
         this.applySlideTweenDown(infCard)
         this.p2Hand.add(infCard)
-        var infHeavyCard = new Card(this, 1005, 700, "cardTempBlack", 0, "Heavy Infantry", 1).setInteractive();
+        var infHeavyCard = new Card(this, 1005, 700, "heavyInfantryCardSinger", 0, "Heavy Infantry", 1).setInteractive();
         this.applySlideTweenUp(infHeavyCard)
         this.applySlideTweenDown(infHeavyCard)
         this.p2Hand.add(infHeavyCard)
-        var pikeCard = new Card(this, 1155, 700, "cardTempBlack", 0, "Pike Block", 1).setInteractive();
+        var pikeCard = new Card(this, 1155, 700, "pikeCardSinger", 0, "Pike Block", 1).setInteractive();
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p2Hand.add(pikeCard)
-        var archerCard = new Card(this, 555, 700, "cardTempBlack", 0, "Archer", 1).setInteractive();
+        var archerCard = new Card(this, 555, 700, "archerCardSinger", 0, "Archer", 1).setInteractive();
         this.applySlideTweenUp(archerCard)
         this.applySlideTweenDown(archerCard)
         this.p2Hand.add(archerCard)
