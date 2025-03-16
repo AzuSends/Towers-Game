@@ -19,6 +19,7 @@ const boardOffestX = 339;
 const squareSize = 60;
 const boardOffsetY = 54;
 const unitOffsetY = 15;
+let timer = 60;
 
 
 

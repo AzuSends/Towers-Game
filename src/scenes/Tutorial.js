@@ -77,7 +77,7 @@ class Tutorial extends Phaser.Scene {
                 this.text2.setText("Combat has two phases. First all flanking and support actions occur, then all orthogonally adjacent units fight")
                 this.text3.setText("When two units fight they compare their modified stats. If a units attack is higher than their enemies defense then they will destroy the enemy.")
                 this.text4.setText("Once combat has resolved the turn will start over with both players making their moves before combat occurs again.");
-                this.text5.setText("")
+                this.text5.setText("Combat results are also displayed in the console showing support, flanking, and units defeated")
                 this.text6.setText("")
                 page += 1
             } else{
@@ -85,6 +85,7 @@ class Tutorial extends Phaser.Scene {
                 this.text2.setText("")
                 this.text3.setText("")
                 this.text4.setText("")
+                this.text5.setText("")
                 advanceButton.setVisible(false)
             }
             //this.add.text(3, offset *12, "Every turn each player makes 3 moves before combat occurs. For their move a player may either deploy a unit,", tutorialTextConfig)

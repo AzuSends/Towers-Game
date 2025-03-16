@@ -19,6 +19,7 @@ class Play extends Phaser.Scene {
         this.p2Deployed = 0;
         this.p1UnitsLost = 0;
         this.p2UnitsLost = 0;
+        this.unitAttacking = false;
 
         //Graphics Controller
         this.graphics = this.add.graphics();
@@ -137,6 +138,15 @@ class Play extends Phaser.Scene {
         this.supportText = this.add.text(3, textOffset * 7, "Support Bonus: ", statDisplayConfig)
         this.whiteUnitCapText = this.add.text(1150, 5, this.p1Deployed + "/5", whiteUnitCap)
         this.blackUnitCapText = this.add.text(1050, 5, this.p2Deployed + "/5", blackUnitCap)
+        whiteUnitCap.backgroundColor = "";
+        this.timerText = this.add.text(1065, 75, 'Time: ' + timer, whiteUnitCap);
+
+        this.timerEvent = this.time.addEvent({
+            delay: 1000,
+            callback: this.onTimerTick,
+            callbackScope: this,
+            loop: true,
+        });
 
 
 
@@ -192,6 +202,8 @@ class Play extends Phaser.Scene {
             this.doCleanup();
             console.log("Turn Passed to Opponent");
             this.turn += 1;
+            timer = 60
+            this.timerText.setText('Time: ' + timer);
 
         }
 
@@ -217,6 +229,7 @@ class Play extends Phaser.Scene {
         }
         for (const child of this.pieces.getChildren()) { //Seperate loop to allow all stat changes to be preformed first
             //Compares combat stats of orthogonally adjacent enemies after bonuses and penalties, units are destroyed if the attacking unit's attack is greater than their defense
+            this.unitAttacking = true
             this.genAttacks(child.boardX, child.boardY, child.range, child.boardX, child.boardY)
         }
 
@@ -285,47 +298,6 @@ class Play extends Phaser.Scene {
 
     }
 
-    attack(i, j) {
-
-        if ((i - 1) >= 0) {
-            if (this.board[i - 1][j] != 0 && this.board[i - 1][j] != undefined) {
-                if (this.board[i - 1][j].player != this.board[i][j].player) {
-                    if (this.board[i][j].fight(this.board[i - 1][j])) {
-                        this.toBeCleaned.push(this.board[i - 1][j])
-                    }
-                }
-            }
-        }
-        if ((j - 1) >= 0) {
-            if (this.board[i][j - 1] != 0 && this.board[i][j - 1] != undefined) {
-                if (this.board[i][j - 1].player != this.board[i][j].player) {
-                    if (this.board[i][j].fight(this.board[i][j - 1])) {
-                        this.toBeCleaned.push(this.board[i][j - 1])
-                    }
-                }
-            }
-        }
-        if ((i + 1) <= 10) {
-            if (this.board[i + 1][j] != 0 && this.board[i + 1][j] != undefined) {
-                if (this.board[i + 1][j].player != this.board[i][j].player) {
-
-                    if (this.board[i][j].fight(this.board[i + 1][j])) {
-                        this.toBeCleaned.push(this.board[i + 1][j])
-                    }
-                }
-            }
-        }
-        if ((j + 1) <= 8) {
-            if (this.board[i][j + 1] != 0 && this.board[i][j + 1] != undefined) {
-                if (this.board[i][j + 1].player != this.board[i][j].player) {
-
-                    if (this.board[i][j].fight(this.board[i][j + 1])) {
-                        this.toBeCleaned.push(this.board[i][j + 1])
-                    }
-                }
-            }
-        }
-    }
 
     checkHighGround(i, j) {
         if (this.terrain[i][j] == 1) {
@@ -381,11 +353,12 @@ class Play extends Phaser.Scene {
         if (range == -1) {
             return;
         }
-        if (x >= 0 && x <= 10) {
+        if (x >= 0 && x <= 10 && this.unitAttacking == true) {
             let defender = this.board[x][y]
             if (defender instanceof Unit && defender.player != attacker.player) {
                 if (attacker.fight(defender)) {
                     this.toBeCleaned.push(defender);
+                    this.unitAttacking = false;
                 }
             }
         }
@@ -417,7 +390,7 @@ class Play extends Phaser.Scene {
     //Creates all the cards, only the piece name is required since stats are all managed in the unit class when the card becomes a unit and only depends on the piece name.
     //  A tween is given to each card causing them to slide up and down on mouse over.  
     drawHandP1() {
-        var calvCard = new Card(this, 125, 700, "cardTempWhite", 0, "Cavilry", 0).setInteractive();
+        var calvCard = new Card(this, 125, 700, "calvaryCardAlethi", 0, "calvary", 0).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p1Hand.add(calvCard)
@@ -433,9 +406,13 @@ class Play extends Phaser.Scene {
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p1Hand.add(pikeCard)
+        var archerCard = new Card(this, 725, 700, "cardTempWhite", 0, "Archer", 0).setInteractive();
+        this.applySlideTweenUp(archerCard)
+        this.applySlideTweenDown(archerCard)
+        this.p1Hand.add(archerCard)
     }
     drawHandP2() {
-        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "Cavilry", 1).setInteractive();
+        var calvCard = new Card(this, 705, 700, "cardTempBlack", 0, "calvary", 1).setInteractive();
         this.applySlideTweenUp(calvCard)
         this.applySlideTweenDown(calvCard)
         this.p2Hand.add(calvCard)
@@ -451,6 +428,11 @@ class Play extends Phaser.Scene {
         this.applySlideTweenUp(pikeCard)
         this.applySlideTweenDown(pikeCard)
         this.p2Hand.add(pikeCard)
+        var archerCard = new Card(this, 555, 700, "cardTempBlack", 0, "Archer", 1).setInteractive();
+        this.applySlideTweenUp(archerCard)
+        this.applySlideTweenDown(archerCard)
+        this.p2Hand.add(archerCard)
+
     }
 
     //Card tween logic, also caused the stat display since both or caused by mouse over
@@ -541,6 +523,7 @@ class Play extends Phaser.Scene {
     //Simple cleanup, when preforming combat pieces are not immediately destroyed since they still have to resolve their attacks so they are instead added to the toBeCleaned array and
     //  deleted at the end of the turn.
     doCleanup() {
+        console.log(this.toBeCleaned)
         for (let i = 0; i < this.toBeCleaned.length; i++) {
             let x = this.toBeCleaned[i].boardX
             let y = this.toBeCleaned[i].boardY
@@ -556,10 +539,11 @@ class Play extends Phaser.Scene {
                     this.gameOver(1)
                 }
             }
-
+            this.pieces.remove(this.toBeCleaned[i],true,true);
 
         }
-        this.pieces.clear();
+
+        
         this.toBeCleaned = []
     }
 
@@ -567,8 +551,8 @@ class Play extends Phaser.Scene {
     //Updates all the stat display text with the stats of the unit the player is hovering.
     displayStats(unit) {
         if (unit.unitName == undefined) {
-            var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name)
-            this.nameText.setText("Name: " + temp.unitName);
+            var temp = new Unit(this, 0, 0, "whiteUnit", 0, 0, 0, 0, unit.name) //Due to stats being tied to the unit's name in order to get the stats for a card easily we can create a
+            this.nameText.setText("Name: " + temp.unitName); //                     temporary version of that unit to pull the stats from then destroy it.
             this.attackText.setText("Attack: " + temp.attack);
             this.defenseText.setText("Defense: " + temp.defense);
             this.rangeText.setText("Range: " + temp.range);
@@ -620,6 +604,28 @@ class Play extends Phaser.Scene {
         this.pieces.setVisible(false);
         this.p1Hand.setVisible(false);
         this.p2Hand.setVisible(false);
+        this.menuButton = this.add.text(this.cameras.main.width / 2, 300, 'Main Menu', {
+            fontSize: '32px',
+            fill: '#fff',
+            fontFamily: 'Arial',
+            padding: { x: 20, y: 10 },
+            backgroundColor: '#333',
+        }).setOrigin(0.5).setInteractive();
+
+        this.menuButton.on('pointerdown', () => {
+            this.scene.start('menuScene');
+        });
+    }
+
+    onTimerTick(){
+        timer--;
+        this.timerText.setText('Time: ' + timer);
+
+        if (timer<= 0){
+            this.movesCurrentTurn = 0;
+            timer = 60;
+            this.timerText.setText('Time: ' + timer);
+        }
     }
 
 
