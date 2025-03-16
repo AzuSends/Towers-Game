@@ -1,6 +1,10 @@
 /*
 Ben Silver
 Towers: A Stormlight Card Game 
+Unsure on time spent
+
+
+
 */
 let config = {
     type: Phaser.AUTO,
